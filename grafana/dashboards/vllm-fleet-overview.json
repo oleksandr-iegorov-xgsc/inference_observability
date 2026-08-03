@@ -26,8 +26,9 @@
       "id": 3,
       "title": "p95 time to first token",
       "type": "timeseries",
+      "fieldConfig": {"defaults": {"unit": "ms"}, "overrides": []},
       "targets": [
-        {"expr": "histogram_quantile(0.95, sum by (le, model, vllm_instance) (rate(vllm:time_to_first_token_seconds_bucket{job=\"vllm\"}[5m])))", "legendFormat": "{{model}}"}
+        {"expr": "1000 * histogram_quantile(0.95, sum by (le, model, vllm_instance) (rate(vllm:time_to_first_token_seconds_bucket{job=\"vllm\"}[5m])))", "legendFormat": "{{model}}"}
       ],
       "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8}
     },
@@ -35,8 +36,9 @@
       "id": 4,
       "title": "p95 end-to-end request latency",
       "type": "timeseries",
+      "fieldConfig": {"defaults": {"unit": "ms"}, "overrides": []},
       "targets": [
-        {"expr": "histogram_quantile(0.95, sum by (le, model, vllm_instance) (rate(vllm:e2e_request_latency_seconds_bucket{job=\"vllm\"}[5m])))", "legendFormat": "{{model}}"}
+        {"expr": "1000 * histogram_quantile(0.95, sum by (le, model, vllm_instance) (rate(vllm:e2e_request_latency_seconds_bucket{job=\"vllm\"}[5m])))", "legendFormat": "{{model}}"}
       ],
       "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8}
     },
@@ -66,5 +68,5 @@
   "timezone": "browser",
   "title": "vLLM Fleet Overview",
   "uid": "vllm-fleet-overview",
-  "version": 1
+  "version": 2
 }
