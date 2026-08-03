@@ -1,0 +1,45 @@
+services:
+  prometheus:
+    image: ${PROMETHEUS_IMAGE}
+    container_name: inference-prometheus
+    network_mode: host
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=${PROMETHEUS_RETENTION}
+      - --web.listen-address=127.0.0.1:${PROMETHEUS_PORT}
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro,Z
+      - ./prometheus/targets:/etc/prometheus/targets:ro,Z
+      - ./prometheus/rules:/etc/prometheus/rules:ro,Z
+      - ./runtime/prometheus:/prometheus:Z
+    restart: unless-stopped
+
+  grafana:
+    image: ${GRAFANA_IMAGE}
+    container_name: inference-grafana
+    network_mode: host
+    environment:
+      GF_SERVER_HTTP_ADDR: 127.0.0.1
+      GF_SERVER_HTTP_PORT: ${GRAFANA_PORT}
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro,Z
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro,Z
+      - ./runtime/grafana:/var/lib/grafana:Z
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+
+  node-exporter:
+    image: ${NODE_EXPORTER_IMAGE}
+    container_name: inference-node-exporter
+    command:
+      - --path.rootfs=/host
+    network_mode: host
+    pid: host
+    volumes:
+      - /:/host:ro,rslave
+    restart: unless-stopped

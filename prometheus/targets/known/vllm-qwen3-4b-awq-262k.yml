@@ -1,0 +1,11 @@
+- targets:
+    - "127.0.0.1:8004"
+  labels:
+    model: "qwen3-4b-awq-262k"
+    model_vendor: "alibaba"
+    model_family: "qwen3"
+    vllm_instance: "qwen3-4b-awq-262k"
+    container: "vllm-qwen3-4b-awq-262k"
+    gpu_group: "gpu=0"
+    quantization: "awq-int8"
+    host_port: "8004"

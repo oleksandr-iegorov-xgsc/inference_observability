@@ -1,0 +1,11 @@
+- targets:
+    - "127.0.0.1:8002"
+  labels:
+    model: "qwen36-27b-64k"
+    model_vendor: "alibaba"
+    model_family: "qwen3.6"
+    vllm_instance: "qwen36-27b-64k"
+    container: "vllm-qwen36-27b-64k"
+    gpu_group: "gpu=0"
+    quantization: "awq"
+    host_port: "8002"

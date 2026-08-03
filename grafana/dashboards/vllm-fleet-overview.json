@@ -1,0 +1,70 @@
+{
+  "annotations": {"list": []},
+  "editable": false,
+  "panels": [
+    {
+      "id": 1,
+      "title": "Requests running / waiting",
+      "type": "timeseries",
+      "targets": [
+        {"expr": "sum by (model, vllm_instance) (vllm:num_requests_running{job=\"vllm\"})", "legendFormat": "{{model}} running"},
+        {"expr": "sum by (model, vllm_instance) (vllm:num_requests_waiting{job=\"vllm\"})", "legendFormat": "{{model}} waiting"}
+      ],
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0}
+    },
+    {
+      "id": 2,
+      "title": "Token throughput / second",
+      "type": "timeseries",
+      "targets": [
+        {"expr": "sum by (model, vllm_instance) (rate(vllm:prompt_tokens_total{job=\"vllm\"}[5m]))", "legendFormat": "{{model}} prompt"},
+        {"expr": "sum by (model, vllm_instance) (rate(vllm:generation_tokens_total{job=\"vllm\"}[5m]))", "legendFormat": "{{model}} generation"}
+      ],
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0}
+    },
+    {
+      "id": 3,
+      "title": "p95 time to first token",
+      "type": "timeseries",
+      "targets": [
+        {"expr": "histogram_quantile(0.95, sum by (le, model, vllm_instance) (rate(vllm:time_to_first_token_seconds_bucket{job=\"vllm\"}[5m])))", "legendFormat": "{{model}}"}
+      ],
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8}
+    },
+    {
+      "id": 4,
+      "title": "p95 end-to-end request latency",
+      "type": "timeseries",
+      "targets": [
+        {"expr": "histogram_quantile(0.95, sum by (le, model, vllm_instance) (rate(vllm:e2e_request_latency_seconds_bucket{job=\"vllm\"}[5m])))", "legendFormat": "{{model}}"}
+      ],
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8}
+    },
+    {
+      "id": 5,
+      "title": "KV cache utilization",
+      "type": "timeseries",
+      "targets": [
+        {"expr": "max by (model, vllm_instance) (vllm:kv_cache_usage_perc{job=\"vllm\"})", "legendFormat": "{{model}}"}
+      ],
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 16}
+    },
+    {
+      "id": 6,
+      "title": "GPU framebuffer memory used",
+      "type": "timeseries",
+      "targets": [
+        {"expr": "DCGM_FI_DEV_FB_USED{job=\"dcgm\"}", "legendFormat": "GPU {{gpu}}"}
+      ],
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 16}
+    }
+  ],
+  "schemaVersion": 41,
+  "tags": ["inference", "vllm"],
+  "templating": {"list": []},
+  "time": {"from": "now-6h", "to": "now"},
+  "timezone": "browser",
+  "title": "vLLM Fleet Overview",
+  "uid": "vllm-fleet-overview",
+  "version": 1
+}

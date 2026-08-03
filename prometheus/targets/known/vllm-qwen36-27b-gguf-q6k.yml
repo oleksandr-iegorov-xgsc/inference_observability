@@ -1,0 +1,11 @@
+- targets:
+    - "127.0.0.1:8007"
+  labels:
+    model: "qwen36-27b-gguf-q6k"
+    model_vendor: "alibaba"
+    model_family: "qwen3.6"
+    vllm_instance: "qwen36-27b-gguf-q6k"
+    container: "vllm-qwen36-27b-gguf-q6k"
+    gpu_group: "gpu=0"
+    quantization: "gguf-q6k"
+    host_port: "8007"

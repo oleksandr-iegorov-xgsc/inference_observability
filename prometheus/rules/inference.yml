@@ -1,0 +1,27 @@
+groups:
+  - name: inference-availability
+    rules:
+      - alert: InferenceTargetDown
+        expr: up{job="vllm"} == 0
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "vLLM target is down"
+          description: "{{ $labels.vllm_instance }} has not been scraped successfully for two minutes."
+      - alert: VllmQueuePressure
+        expr: vllm:num_requests_waiting > 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "vLLM queue is persistently non-empty"
+          description: "{{ $labels.vllm_instance }} has queued requests for five minutes."
+      - alert: GpuMemoryPressure
+        expr: DCGM_FI_DEV_FB_USED / DCGM_FI_DEV_FB_TOTAL > 0.95
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "GPU framebuffer memory is above 95%"
+          description: "GPU {{ $labels.gpu }} has sustained high framebuffer usage."

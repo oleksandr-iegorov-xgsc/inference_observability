@@ -1,0 +1,11 @@
+- targets:
+    - "127.0.0.1:8009"
+  labels:
+    model: "qwen3-8b-awq-32k-invariant"
+    model_vendor: "alibaba"
+    model_family: "qwen3"
+    vllm_instance: "qwen3-8b-awq-32k-invariant"
+    container: "vllm-qwen3-8b-awq-32k-invariant"
+    gpu_group: "gpu=0"
+    quantization: "awq"
+    host_port: "8009"

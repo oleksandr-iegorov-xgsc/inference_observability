@@ -1,0 +1,11 @@
+- targets:
+    - "127.0.0.1:8301"
+  labels:
+    model: "gemma4-31b-int4-256k"
+    model_vendor: "google"
+    model_family: "gemma4"
+    vllm_instance: "gemma4-31b-int4-256k"
+    container: "vllm-gemma4-31b-int4-256k"
+    gpu_group: "gpu=0"
+    quantization: "int4"
+    host_port: "8301"
