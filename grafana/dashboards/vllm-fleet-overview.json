@@ -6,6 +6,12 @@
       "id": 1,
       "title": "Requests running / waiting",
       "type": "timeseries",
+      "fieldConfig": {
+        "defaults": {"custom": {"axisPlacement": "left"}},
+        "overrides": [
+          {"matcher": {"id": "byRegexp", "options": "/ waiting$/"}, "properties": [{"id": "custom.axisPlacement", "value": "right"}]}
+        ]
+      },
       "targets": [
         {"expr": "sum by (model, vllm_instance) (vllm:num_requests_running{job=\"vllm\"})", "legendFormat": "{{model}} running"},
         {"expr": "sum by (model, vllm_instance) (vllm:num_requests_waiting{job=\"vllm\"})", "legendFormat": "{{model}} waiting"}
@@ -16,6 +22,12 @@
       "id": 2,
       "title": "Token throughput / second",
       "type": "timeseries",
+      "fieldConfig": {
+        "defaults": {"custom": {"axisPlacement": "left"}},
+        "overrides": [
+          {"matcher": {"id": "byRegexp", "options": "/ generation$/"}, "properties": [{"id": "custom.axisPlacement", "value": "right"}]}
+        ]
+      },
       "targets": [
         {"expr": "sum by (model, vllm_instance) (rate(vllm:prompt_tokens_total{job=\"vllm\"}[5m]))", "legendFormat": "{{model}} prompt"},
         {"expr": "sum by (model, vllm_instance) (rate(vllm:generation_tokens_total{job=\"vllm\"}[5m]))", "legendFormat": "{{model}} generation"}
