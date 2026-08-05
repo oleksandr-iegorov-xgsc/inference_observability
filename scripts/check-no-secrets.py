@@ -8,7 +8,9 @@ import sys
 BAD_NAMES = re.compile(r'(^|/)(\.env|.*(?:secret|credential|token|password|key).*)$', re.I)
 ASSIGNMENT = re.compile(r'(?im)^\s*(?:api[_-]?key|password|secret|token)\s*[:=]\s*\S+')
 OPAQUE = re.compile(r'\b(?:ghp_|hf_|sk-)[A-Za-z0-9_-]{16,}\b')
-paths = subprocess.check_output(['git', 'diff', '--cached', '--name-only', '-z']).split(b'\0')
+paths = subprocess.check_output(
+    ['git', 'diff', '--cached', '--diff-filter=ACMR', '--name-only', '-z']
+).split(b'\0')
 for raw in paths:
     if not raw:
         continue
