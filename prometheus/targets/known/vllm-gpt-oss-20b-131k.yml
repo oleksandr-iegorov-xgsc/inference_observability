@@ -1,6 +1,7 @@
 - targets:
     - "127.0.0.1:8401"
   labels:
+    host: "AIMachine002"
     model: "gpt-oss-20b-131k"
     model_vendor: "openai"
     model_family: "gpt"

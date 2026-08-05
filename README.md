@@ -23,7 +23,7 @@ The vLLM backends remain private. Prometheus uses host networking to scrape thei
 ./scripts/generate_targets.py --all-active sync-active
 ```
 
-Run `sync-active` after starting or stopping a model. Prometheus notices active target changes without a restart.
+Run `sync-active` after starting or stopping a model. Prometheus notices active target changes without a restart. Targets receive a stable `host` label (the local hostname by default); pass `--host "$FLEET_HOST"` when a deployment uses a deliberate inventory name.
 
 ## Local secret setup
 
@@ -39,9 +39,15 @@ podman-compose --env-file .env -f compose.yaml up -d
 
 `run-dcgm-exporter.sh` intentionally uses the verified NVIDIA OCI hook at `/opt/agent_infrastructure/podman_vllm/hooks`, because this host's rootless Podman 4.9.3 cannot resolve the current NVIDIA CDI device identifiers. The rest of the stack uses Compose.
 
-## Dashboard model selection
+## Fleet host and model selection
 
-The provisioned **vLLM Fleet Overview** dashboard has a multi-select `Model` variable. It defaults to `All`; select one or more models to filter every vLLM request, throughput, latency, and KV-cache panel while retaining a separate series per model and vLLM instance. The DCGM GPU-memory panel remains host-wide because DCGM exposes GPU telemetry rather than model-labelled telemetry; GPU memory cannot be attributed exactly when models share a GPU.
+The provisioned **vLLM Fleet Overview** dashboard has multi-select `Host` and `Model` variables. `Host` filters all vLLM and DCGM panels, and `Model` filters the vLLM request, throughput, latency, and KV-cache panels. Every engine series retains `host`, `model`, and `vllm_instance` in its grouping, so history remains comparable after new servers are added.
+
+GPU processing utilization, temperature, power draw, and framebuffer-memory panels use DCGM telemetry and are host-wide physical-GPU measurements. They cannot be allocated exactly to a selected model or agent when workloads share a GPU. For a tensor-parallel model, inspect each GPU series individually; do not sum utilization percentages.
+
+## Adding another server
+
+Run the same exporter stack on the new server, give its Prometheus targets a unique stable `host` label, and keep the vLLM `model` and `vllm_instance` labels unchanged in meaning. Aggregate the per-host Prometheus servers with federation or remote write into the Grafana datasource; do not scrape a remote server's loopback-only vLLM endpoints from this host. The `host` label is the fleet boundary, while `instance` remains the exporter endpoint and `vllm_instance` remains the logical model-server identity.
 
 ## Attribution boundary
 

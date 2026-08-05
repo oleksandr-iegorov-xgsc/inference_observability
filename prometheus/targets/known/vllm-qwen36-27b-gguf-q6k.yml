@@ -1,6 +1,7 @@
 - targets:
     - "127.0.0.1:8007"
   labels:
+    host: "AIMachine002"
     model: "qwen36-27b-gguf-q6k"
     model_vendor: "qwen"
     model_family: "qwen"

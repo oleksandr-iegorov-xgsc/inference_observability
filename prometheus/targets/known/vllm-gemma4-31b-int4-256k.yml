@@ -1,6 +1,7 @@
 - targets:
     - "127.0.0.1:8301"
   labels:
+    host: "AIMachine002"
     model: "gemma4-31b-int4-256k"
     model_vendor: "google"
     model_family: "gemma"

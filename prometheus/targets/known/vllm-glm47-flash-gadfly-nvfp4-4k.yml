@@ -1,6 +1,7 @@
 - targets:
     - "127.0.0.1:8702"
   labels:
+    host: "AIMachine002"
     model: "glm47-flash-gadfly-nvfp4-4k"
     model_vendor: "gadflyii"
     model_family: "glm"

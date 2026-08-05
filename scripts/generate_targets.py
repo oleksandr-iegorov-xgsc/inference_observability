@@ -6,6 +6,7 @@ import argparse
 import json
 import os
 import shutil
+import socket
 import subprocess
 from pathlib import Path
 
@@ -59,7 +60,7 @@ def yaml_quote(value: str) -> str:
     return json.dumps(value)
 
 
-def target_yaml(env: dict[str, str], args: dict) -> str:
+def target_yaml(env: dict[str, str], args: dict, host: str) -> str:
     instance = env['INSTANCE_NAME']
     inferred_vendor, inferred_family, inferred_quantization = classify(env['MODEL_ID'], instance, args)
     vendor = env.get('MODEL_VENDOR', inferred_vendor)
@@ -67,6 +68,7 @@ def target_yaml(env: dict[str, str], args: dict) -> str:
     quantization = env.get('QUANTIZATION', inferred_quantization)
     gpu_group = env.get('GPU_DEVICES', 'unknown').replace('nvidia.com/', '')
     labels = {
+        'host': host,
         'model': env['SERVED_MODEL_NAME'],
         'model_vendor': vendor,
         'model_family': family,
@@ -81,7 +83,7 @@ def target_yaml(env: dict[str, str], args: dict) -> str:
     return '\n'.join(lines) + '\n'
 
 
-def known(models: Path, output: Path) -> dict[str, Path]:
+def known(models: Path, output: Path, host: str) -> dict[str, Path]:
     output.mkdir(parents=True, exist_ok=True)
     result: dict[str, Path] = {}
     for env_path in sorted(models.glob('*/model.env')):
@@ -91,7 +93,7 @@ def known(models: Path, output: Path) -> dict[str, Path]:
         if not isinstance(args, dict):
             raise ValueError(f'{args_path} must contain a JSON object')
         destination = output / f'vllm-{env["INSTANCE_NAME"]}.yml'
-        destination.write_text(target_yaml(env, args))
+        destination.write_text(target_yaml(env, args, host))
         result[env['CONTAINER_NAME']] = destination
     return result
 
@@ -107,12 +109,17 @@ def running_containers() -> set[str]:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument('--models-root', type=Path, default=DEFAULT_MODELS)
+    parser.add_argument(
+        '--host',
+        default=os.environ.get('FLEET_HOST', socket.gethostname()),
+        help='stable host label for generated targets (defaults to FLEET_HOST or local hostname)',
+    )
     parser.add_argument('--all-active', action='store_true', help='activate every configured profile')
     parser.add_argument('command', choices=('generate-known', 'sync-active'))
     ns = parser.parse_args()
     known_dir = ROOT / 'prometheus' / 'targets' / 'known'
     active_dir = ROOT / 'prometheus' / 'targets' / 'active'
-    profiles = known(ns.models_root, known_dir)
+    profiles = known(ns.models_root, known_dir, ns.host)
     if ns.command == 'generate-known':
         print(f'generated {len(profiles)} known vLLM targets in {known_dir}')
         return

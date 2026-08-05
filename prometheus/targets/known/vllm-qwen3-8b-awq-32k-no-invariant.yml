@@ -1,6 +1,7 @@
 - targets:
     - "127.0.0.1:8008"
   labels:
+    host: "AIMachine002"
     model: "qwen3-8b-awq-32k-no-invariant"
     model_vendor: "qwen"
     model_family: "qwen"

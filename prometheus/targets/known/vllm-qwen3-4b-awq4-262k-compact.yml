@@ -1,6 +1,7 @@
 - targets:
     - "127.0.0.1:8006"
   labels:
+    host: "AIMachine002"
     model: "qwen3-4b-awq4-262k-compact"
     model_vendor: "qwen"
     model_family: "qwen"

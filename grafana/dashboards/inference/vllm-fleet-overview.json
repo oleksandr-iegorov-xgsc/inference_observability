@@ -3,8 +3,19 @@
   "editable": false,
   "panels": [
     {
+      "id": 0,
+      "title": "How to read this dashboard",
+      "type": "text",
+      "options": {
+        "mode": "markdown",
+        "content": "## Fleet and GPU scope\n\nUse **Host** to select one or more vLLM servers, then **Model** to narrow vLLM engine metrics. Request, throughput, latency, and KV-cache panels are measured per vLLM instance and may be grouped across hosts. GPU panels come from DCGM and describe physical GPUs on the selected hosts; they are **not** attributable exactly to a model or agent when workloads share a GPU.\n\nFor a multi-GPU tensor-parallel model, inspect each GPU series for imbalance. Do not sum GPU utilization percentages; power and framebuffer-memory values are additive only when the selected GPUs are distinct physical devices."
+      },
+      "gridPos": {"h": 4, "w": 24, "x": 0, "y": 0}
+    },
+    {
       "id": 1,
       "title": "Requests running / waiting",
+      "description": "Current vLLM scheduler work on the selected hosts and models. Running requests use the left axis; queued requests use the right axis. This is per vLLM instance, not per agent or physical GPU.",
       "type": "timeseries",
       "fieldConfig": {
         "defaults": {"custom": {"axisPlacement": "left"}},
@@ -13,14 +24,15 @@
         ]
       },
       "targets": [
-        {"expr": "sum by (model, vllm_instance) (vllm:num_requests_running{job=\"vllm\", model=~\"$model\"})", "legendFormat": "{{model}} running"},
-        {"expr": "sum by (model, vllm_instance) (vllm:num_requests_waiting{job=\"vllm\", model=~\"$model\"})", "legendFormat": "{{model}} waiting"}
+        {"expr": "sum by (host, model, vllm_instance) (vllm:num_requests_running{job=\"vllm\", host=~\"$host\", model=~\"$model\"})", "legendFormat": "{{host}} / {{model}} / {{vllm_instance}} running"},
+        {"expr": "sum by (host, model, vllm_instance) (vllm:num_requests_waiting{job=\"vllm\", host=~\"$host\", model=~\"$model\"})", "legendFormat": "{{host}} / {{model}} / {{vllm_instance}} waiting"}
       ],
-      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0}
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 4}
     },
     {
       "id": 2,
       "title": "Token throughput / second",
+      "description": "Prompt and generation token rates over five minutes for selected vLLM instances. Prompt rate uses the left axis and generation rate the right axis. This is engine throughput, not an exact per-agent allocation.",
       "type": "timeseries",
       "fieldConfig": {
         "defaults": {"custom": {"axisPlacement": "left"}},
@@ -29,62 +41,116 @@
         ]
       },
       "targets": [
-        {"expr": "sum by (model, vllm_instance) (rate(vllm:prompt_tokens_total{job=\"vllm\", model=~\"$model\"}[5m]))", "legendFormat": "{{model}} prompt"},
-        {"expr": "sum by (model, vllm_instance) (rate(vllm:generation_tokens_total{job=\"vllm\", model=~\"$model\"}[5m]))", "legendFormat": "{{model}} generation"}
+        {"expr": "sum by (host, model, vllm_instance) (rate(vllm:prompt_tokens_total{job=\"vllm\", host=~\"$host\", model=~\"$model\"}[5m]))", "legendFormat": "{{host}} / {{model}} / {{vllm_instance}} prompt"},
+        {"expr": "sum by (host, model, vllm_instance) (rate(vllm:generation_tokens_total{job=\"vllm\", host=~\"$host\", model=~\"$model\"}[5m]))", "legendFormat": "{{host}} / {{model}} / {{vllm_instance}} generation"}
       ],
-      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0}
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 4}
     },
     {
       "id": 3,
       "title": "p95 time to first token",
+      "description": "95th-percentile time from request arrival to first generated token over five minutes, in milliseconds, for each selected vLLM instance. It is request-level engine telemetry, not GPU or agent-specific latency.",
       "type": "timeseries",
       "fieldConfig": {"defaults": {"unit": "ms"}, "overrides": []},
       "targets": [
-        {"expr": "1000 * histogram_quantile(0.95, sum by (le, model, vllm_instance) (rate(vllm:time_to_first_token_seconds_bucket{job=\"vllm\", model=~\"$model\"}[5m])))", "legendFormat": "{{model}}"}
+        {"expr": "1000 * histogram_quantile(0.95, sum by (le, host, model, vllm_instance) (rate(vllm:time_to_first_token_seconds_bucket{job=\"vllm\", host=~\"$host\", model=~\"$model\"}[5m])))", "legendFormat": "{{host}} / {{model}} / {{vllm_instance}}"}
       ],
-      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8}
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 12}
     },
     {
       "id": 4,
       "title": "p95 end-to-end request latency",
+      "description": "95th-percentile full request latency over five minutes, in milliseconds, for each selected vLLM instance. Includes the request lifecycle observed by vLLM; it is not attributable to individual GPUs or agents.",
       "type": "timeseries",
       "fieldConfig": {"defaults": {"unit": "ms"}, "overrides": []},
       "targets": [
-        {"expr": "1000 * histogram_quantile(0.95, sum by (le, model, vllm_instance) (rate(vllm:e2e_request_latency_seconds_bucket{job=\"vllm\", model=~\"$model\"}[5m])))", "legendFormat": "{{model}}"}
+        {"expr": "1000 * histogram_quantile(0.95, sum by (le, host, model, vllm_instance) (rate(vllm:e2e_request_latency_seconds_bucket{job=\"vllm\", host=~\"$host\", model=~\"$model\"}[5m])))", "legendFormat": "{{host}} / {{model}} / {{vllm_instance}}"}
       ],
-      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8}
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 12}
     },
     {
       "id": 5,
       "title": "KV cache utilization",
+      "description": "Highest reported vLLM KV-cache usage percentage for each selected instance. Sustained high values indicate cache pressure and can precede queueing or request failures. It is model-instance scope, not a physical-GPU allocation measurement.",
       "type": "timeseries",
+      "fieldConfig": {"defaults": {"unit": "percent"}, "overrides": []},
       "targets": [
-        {"expr": "max by (model, vllm_instance) (vllm:kv_cache_usage_perc{job=\"vllm\", model=~\"$model\"})", "legendFormat": "{{model}}"}
+        {"expr": "max by (host, model, vllm_instance) (vllm:kv_cache_usage_perc{job=\"vllm\", host=~\"$host\", model=~\"$model\"})", "legendFormat": "{{host}} / {{model}} / {{vllm_instance}}"}
       ],
-      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 16}
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 20}
     },
     {
       "id": 6,
-      "title": "GPU framebuffer memory used (host-wide)",
-      "description": "DCGM exposes GPU-level telemetry, not a model label. This panel cannot attribute shared-GPU VRAM to a selected model; use it as host capacity telemetry.",
+      "title": "GPU processing utilization (host-wide)",
+      "description": "DCGM-reported physical-GPU utilization percentage on selected hosts. High sustained values mean the GPU is busy. This is host-wide hardware telemetry and cannot be allocated exactly to a selected model or agent when workloads share a GPU.",
       "type": "timeseries",
+      "fieldConfig": {"defaults": {"unit": "percent", "min": 0, "max": 100}, "overrides": []},
       "targets": [
-        {"expr": "DCGM_FI_DEV_FB_USED{job=\"dcgm\"}", "legendFormat": "GPU {{gpu}}"}
+        {"expr": "max by (host, gpu, modelName) (DCGM_FI_DEV_GPU_UTIL{job=\"dcgm\", host=~\"$host\"})", "legendFormat": "{{host}} GPU {{gpu}} / {{modelName}}"}
       ],
-      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 16}
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 20}
+    },
+    {
+      "id": 7,
+      "title": "GPU temperature (host-wide)",
+      "description": "DCGM-reported core temperature in degrees Celsius for each physical GPU on selected hosts. Use sustained trends and the GPU model's vendor limits to assess thermal headroom; this is not model- or agent-specific telemetry.",
+      "type": "timeseries",
+      "fieldConfig": {"defaults": {"unit": "celsius", "min": 0}, "overrides": []},
+      "targets": [
+        {"expr": "max by (host, gpu, modelName) (DCGM_FI_DEV_GPU_TEMP{job=\"dcgm\", host=~\"$host\"})", "legendFormat": "{{host}} GPU {{gpu}} / {{modelName}}"}
+      ],
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 28}
+    },
+    {
+      "id": 8,
+      "title": "GPU power draw (host-wide)",
+      "description": "DCGM-reported instantaneous power draw in watts for each physical GPU on selected hosts. Sum only distinct physical GPUs when estimating host or fleet power. Shared-GPU power cannot be assigned exactly to a model or agent.",
+      "type": "timeseries",
+      "fieldConfig": {"defaults": {"unit": "watt", "min": 0}, "overrides": []},
+      "targets": [
+        {"expr": "max by (host, gpu, modelName) (DCGM_FI_DEV_POWER_USAGE{job=\"dcgm\", host=~\"$host\"})", "legendFormat": "{{host}} GPU {{gpu}} / {{modelName}}"}
+      ],
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 28}
+    },
+    {
+      "id": 9,
+      "title": "GPU framebuffer memory used (host-wide)",
+      "description": "DCGM-reported used framebuffer memory in MiB for each physical GPU on selected hosts. It shows host capacity pressure but cannot attribute shared-GPU VRAM exactly to a selected model or agent.",
+      "type": "timeseries",
+      "fieldConfig": {"defaults": {"unit": "mbytes", "min": 0}, "overrides": []},
+      "targets": [
+        {"expr": "max by (host, gpu, modelName) (DCGM_FI_DEV_FB_USED{job=\"dcgm\", host=~\"$host\"})", "legendFormat": "{{host}} GPU {{gpu}} / {{modelName}}"}
+      ],
+      "gridPos": {"h": 8, "w": 24, "x": 0, "y": 36}
     }
   ],
   "schemaVersion": 41,
-  "tags": ["inference", "vllm"],
+  "tags": ["inference", "vllm", "gpu", "fleet"],
   "templating": {
     "list": [
+      {
+        "name": "host",
+        "label": "Host",
+        "type": "query",
+        "datasource": {"type": "prometheus", "uid": "prometheus"},
+        "definition": "label_values(DCGM_FI_DEV_GPU_UTIL{job=\"dcgm\"}, host)",
+        "query": {"query": "label_values(DCGM_FI_DEV_GPU_UTIL{job=\"dcgm\"}, host)", "refId": "PrometheusVariableQueryEditor-VariableQuery"},
+        "refresh": 1,
+        "sort": 1,
+        "multi": true,
+        "includeAll": true,
+        "allValue": ".*",
+        "current": {"text": "All", "value": "$__all"},
+        "hide": 0,
+        "options": []
+      },
       {
         "name": "model",
         "label": "Model",
         "type": "query",
         "datasource": {"type": "prometheus", "uid": "prometheus"},
-        "definition": "label_values(vllm:num_requests_running{job=\"vllm\"}, model)",
-        "query": {"query": "label_values(vllm:num_requests_running{job=\"vllm\"}, model)", "refId": "PrometheusVariableQueryEditor-VariableQuery"},
+        "definition": "label_values(vllm:num_requests_running{job=\"vllm\", host=~\"$host\"}, model)",
+        "query": {"query": "label_values(vllm:num_requests_running{job=\"vllm\", host=~\"$host\"}, model)", "refId": "PrometheusVariableQueryEditor-VariableQuery"},
         "refresh": 1,
         "sort": 1,
         "multi": true,
@@ -100,5 +166,5 @@
   "timezone": "browser",
   "title": "vLLM Fleet Overview",
   "uid": "vllm-fleet-overview",
-  "version": 3
+  "version": 4
 }

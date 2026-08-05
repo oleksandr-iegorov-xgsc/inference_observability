@@ -1,6 +1,7 @@
 - targets:
     - "127.0.0.1:8701"
   labels:
+    host: "AIMachine002"
     model: "glm47-flash-nvfp4-128k"
     model_vendor: "zai"
     model_family: "glm"
