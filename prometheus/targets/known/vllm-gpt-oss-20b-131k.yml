@@ -3,9 +3,9 @@
   labels:
     model: "gpt-oss-20b-131k"
     model_vendor: "openai"
-    model_family: "gpt-oss"
+    model_family: "gpt"
     vllm_instance: "gpt-oss-20b-131k"
     container: "vllm-gpt-oss-20b-131k"
     gpu_group: "gpu=0"
-    quantization: "unspecified"
+    quantization: "auto"
     host_port: "8401"

@@ -1,0 +1,11 @@
+- targets:
+    - "127.0.0.1:8701"
+  labels:
+    model: "glm47-flash-nvfp4-128k"
+    model_vendor: "zai"
+    model_family: "glm"
+    vllm_instance: "glm47-flash-nvfp4-128k"
+    container: "vllm-glm47-flash-nvfp4-128k"
+    gpu_group: "gpu=0"
+    quantization: "compressed-tensors-nvfp4"
+    host_port: "8701"

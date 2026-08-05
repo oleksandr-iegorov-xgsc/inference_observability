@@ -61,7 +61,10 @@ def yaml_quote(value: str) -> str:
 
 def target_yaml(env: dict[str, str], args: dict) -> str:
     instance = env['INSTANCE_NAME']
-    vendor, family, quantization = classify(env['MODEL_ID'], instance, args)
+    inferred_vendor, inferred_family, inferred_quantization = classify(env['MODEL_ID'], instance, args)
+    vendor = env.get('MODEL_VENDOR', inferred_vendor)
+    family = env.get('MODEL_FAMILY', inferred_family)
+    quantization = env.get('QUANTIZATION', inferred_quantization)
     gpu_group = env.get('GPU_DEVICES', 'unknown').replace('nvidia.com/', '')
     labels = {
         'model': env['SERVED_MODEL_NAME'],

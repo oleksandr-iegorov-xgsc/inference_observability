@@ -3,9 +3,9 @@
   labels:
     model: "gemma4-31b-int4-256k"
     model_vendor: "google"
-    model_family: "gemma4"
+    model_family: "gemma"
     vllm_instance: "gemma4-31b-int4-256k"
     container: "vllm-gemma4-31b-int4-256k"
     gpu_group: "gpu=0"
-    quantization: "int4"
+    quantization: "compressed-tensors-w4a16"
     host_port: "8301"

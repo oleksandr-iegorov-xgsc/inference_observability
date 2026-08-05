@@ -2,10 +2,10 @@
     - "127.0.0.1:8006"
   labels:
     model: "qwen3-4b-awq4-262k-compact"
-    model_vendor: "alibaba"
-    model_family: "qwen3"
+    model_vendor: "qwen"
+    model_family: "qwen"
     vllm_instance: "qwen3-4b-awq4-262k-compact"
     container: "vllm-qwen3-4b-awq4-262k-compact"
     gpu_group: "gpu=0"
-    quantization: "awq-int4"
+    quantization: "awq-4bit"
     host_port: "8006"
