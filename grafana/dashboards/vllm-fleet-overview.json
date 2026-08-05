@@ -13,8 +13,8 @@
         ]
       },
       "targets": [
-        {"expr": "sum by (model, vllm_instance) (vllm:num_requests_running{job=\"vllm\"})", "legendFormat": "{{model}} running"},
-        {"expr": "sum by (model, vllm_instance) (vllm:num_requests_waiting{job=\"vllm\"})", "legendFormat": "{{model}} waiting"}
+        {"expr": "sum by (model, vllm_instance) (vllm:num_requests_running{job=\"vllm\", model=~\"$model\"})", "legendFormat": "{{model}} running"},
+        {"expr": "sum by (model, vllm_instance) (vllm:num_requests_waiting{job=\"vllm\", model=~\"$model\"})", "legendFormat": "{{model}} waiting"}
       ],
       "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0}
     },
@@ -29,8 +29,8 @@
         ]
       },
       "targets": [
-        {"expr": "sum by (model, vllm_instance) (rate(vllm:prompt_tokens_total{job=\"vllm\"}[5m]))", "legendFormat": "{{model}} prompt"},
-        {"expr": "sum by (model, vllm_instance) (rate(vllm:generation_tokens_total{job=\"vllm\"}[5m]))", "legendFormat": "{{model}} generation"}
+        {"expr": "sum by (model, vllm_instance) (rate(vllm:prompt_tokens_total{job=\"vllm\", model=~\"$model\"}[5m]))", "legendFormat": "{{model}} prompt"},
+        {"expr": "sum by (model, vllm_instance) (rate(vllm:generation_tokens_total{job=\"vllm\", model=~\"$model\"}[5m]))", "legendFormat": "{{model}} generation"}
       ],
       "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0}
     },
@@ -40,7 +40,7 @@
       "type": "timeseries",
       "fieldConfig": {"defaults": {"unit": "ms"}, "overrides": []},
       "targets": [
-        {"expr": "1000 * histogram_quantile(0.95, sum by (le, model, vllm_instance) (rate(vllm:time_to_first_token_seconds_bucket{job=\"vllm\"}[5m])))", "legendFormat": "{{model}}"}
+        {"expr": "1000 * histogram_quantile(0.95, sum by (le, model, vllm_instance) (rate(vllm:time_to_first_token_seconds_bucket{job=\"vllm\", model=~\"$model\"}[5m])))", "legendFormat": "{{model}}"}
       ],
       "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8}
     },
@@ -50,7 +50,7 @@
       "type": "timeseries",
       "fieldConfig": {"defaults": {"unit": "ms"}, "overrides": []},
       "targets": [
-        {"expr": "1000 * histogram_quantile(0.95, sum by (le, model, vllm_instance) (rate(vllm:e2e_request_latency_seconds_bucket{job=\"vllm\"}[5m])))", "legendFormat": "{{model}}"}
+        {"expr": "1000 * histogram_quantile(0.95, sum by (le, model, vllm_instance) (rate(vllm:e2e_request_latency_seconds_bucket{job=\"vllm\", model=~\"$model\"}[5m])))", "legendFormat": "{{model}}"}
       ],
       "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8}
     },
@@ -59,13 +59,14 @@
       "title": "KV cache utilization",
       "type": "timeseries",
       "targets": [
-        {"expr": "max by (model, vllm_instance) (vllm:kv_cache_usage_perc{job=\"vllm\"})", "legendFormat": "{{model}}"}
+        {"expr": "max by (model, vllm_instance) (vllm:kv_cache_usage_perc{job=\"vllm\", model=~\"$model\"})", "legendFormat": "{{model}}"}
       ],
       "gridPos": {"h": 8, "w": 12, "x": 0, "y": 16}
     },
     {
       "id": 6,
-      "title": "GPU framebuffer memory used",
+      "title": "GPU framebuffer memory used (host-wide)",
+      "description": "DCGM exposes GPU-level telemetry, not a model label. This panel cannot attribute shared-GPU VRAM to a selected model; use it as host capacity telemetry.",
       "type": "timeseries",
       "targets": [
         {"expr": "DCGM_FI_DEV_FB_USED{job=\"dcgm\"}", "legendFormat": "GPU {{gpu}}"}
@@ -75,10 +76,29 @@
   ],
   "schemaVersion": 41,
   "tags": ["inference", "vllm"],
-  "templating": {"list": []},
+  "templating": {
+    "list": [
+      {
+        "name": "model",
+        "label": "Model",
+        "type": "query",
+        "datasource": {"type": "prometheus", "uid": "prometheus"},
+        "definition": "label_values(vllm:num_requests_running{job=\"vllm\"}, model)",
+        "query": {"query": "label_values(vllm:num_requests_running{job=\"vllm\"}, model)", "refId": "PrometheusVariableQueryEditor-VariableQuery"},
+        "refresh": 1,
+        "sort": 1,
+        "multi": true,
+        "includeAll": true,
+        "allValue": ".*",
+        "current": {"text": "All", "value": "$__all"},
+        "hide": 0,
+        "options": []
+      }
+    ]
+  },
   "time": {"from": "now-6h", "to": "now"},
   "timezone": "browser",
   "title": "vLLM Fleet Overview",
   "uid": "vllm-fleet-overview",
-  "version": 2
+  "version": 3
 }

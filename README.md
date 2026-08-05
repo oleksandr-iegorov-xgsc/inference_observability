@@ -39,6 +39,10 @@ podman-compose --env-file .env -f compose.yaml up -d
 
 `run-dcgm-exporter.sh` intentionally uses the verified NVIDIA OCI hook at `/opt/agent_infrastructure/podman_vllm/hooks`, because this host's rootless Podman 4.9.3 cannot resolve the current NVIDIA CDI device identifiers. The rest of the stack uses Compose.
 
+## Dashboard model selection
+
+The provisioned **vLLM Fleet Overview** dashboard has a multi-select `Model` variable. It defaults to `All`; select one or more models to filter every vLLM request, throughput, latency, and KV-cache panel while retaining a separate series per model and vLLM instance. The DCGM GPU-memory panel remains host-wide because DCGM exposes GPU telemetry rather than model-labelled telemetry; GPU memory cannot be attributed exactly when models share a GPU.
+
 ## Attribution boundary
 
 This deployment measures model, vLLM instance, host, and GPU behavior. It does not provide per-agent measurements because agents call vLLM directly. An authenticated proxy is the future extension point for metrics labelled with `agent_id`.
