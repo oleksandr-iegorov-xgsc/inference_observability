@@ -1,4 +1,37 @@
 services:
+  hermes-lcm-exporter:
+    build:
+      context: ../hermes-lcm-prometheus-exporter
+    image: ${HERMES_LCM_EXPORTER_IMAGE:-hermes-lcm-prometheus-exporter:local}
+    container_name: hermes-lcm-exporter
+    network_mode: host
+    userns_mode: keep-id
+    user: "${HERMES_UID:-1000}:${HERMES_GID:-1000}"
+    command:
+      - --config
+      - /etc/hermes-lcm-exporter/sources.json
+      - --listen
+      - 127.0.0.1
+      - --port
+      - "9476"
+    volumes:
+      - ./hermes-lcm-exporter/sources.json:/etc/hermes-lcm-exporter/sources.json:ro,Z
+      - ${HERMES_HOME}/profiles:/lcm/profiles:ro,Z
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:9476/healthz')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    restart: unless-stopped
+
   prometheus:
     image: ${PROMETHEUS_IMAGE}
     container_name: inference-prometheus

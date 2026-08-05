@@ -1,0 +1,114 @@
+{
+  "annotations": {"list": []},
+  "description": "Profile-wide LCM database state and structure. Hover the ⓘ beside a panel title for definitions and interpretation. Per-compaction duration and reduction-event history require durable event instrumentation in hermes-lcm.",
+  "editable": false,
+  "panels": [
+    {
+      "id": 8,
+      "title": "How to read this dashboard",
+      "type": "text",
+      "options": {
+        "mode": "markdown",
+        "content": "## Hermes LCM structure\n\nLCM retains **raw message records** and builds a **summary DAG** over older material. A **depth-0 node** is a leaf summary over raw message ranges; a higher-depth node summarizes lower-depth nodes. All charts are profile-wide, so they include every LCM session in the selected Hermes profile.\n\nHover the **ⓘ** beside each title for metric definitions and interpretation. These are current-state metrics sampled by Prometheus; they do not yet provide a durable history of individual compaction duration, success/failure, or reduction percentage."
+      },
+      "gridPos": {"h": 5, "w": 24, "x": 0, "y": 0}
+    },
+    {
+      "id": 1,
+      "title": "Exporter / database health",
+      "description": "Whether the exporter could read the selected profile's LCM SQLite database at the latest scrape. 1 means the database was read successfully; 0 means it was unavailable or unreadable. This measures exporter/database access, not the health of a particular LCM compaction.",
+      "type": "timeseries",
+      "fieldConfig": {"defaults": {"min": 0, "max": 1, "unit": "none"}, "overrides": []},
+      "targets": [{"expr": "hermes_lcm_exporter_up{job=\"hermes_lcm\", profile=~\"$profile\"}", "legendFormat": "{{profile}}"}],
+      "gridPos": {"h": 8, "w": 8, "x": 0, "y": 5}
+    },
+    {
+      "id": 2,
+      "title": "Current compression ratio",
+      "description": "Represented source tokens divided by stored summary tokens. For example, 50 means roughly 50 tokens of retained source history are represented by each stored summary token. Higher values indicate more compact retained summaries. This is a profile-wide state ratio, not the percentage reduction from one individual compaction.",
+      "type": "timeseries",
+      "fieldConfig": {"defaults": {"unit": "ratio"}, "overrides": []},
+      "targets": [{"expr": "hermes_lcm_summary_compression_ratio{job=\"hermes_lcm\", profile=~\"$profile\"}", "legendFormat": "{{profile}}"}],
+      "gridPos": {"h": 8, "w": 8, "x": 8, "y": 5}
+    },
+    {
+      "id": 3,
+      "title": "Time since last summary",
+      "description": "Elapsed wall-clock time since the newest persisted summary node in the selected profile. It resets when LCM writes a summary. A growing value may simply mean the profile has been idle; interpret it together with message growth and lifecycle debt rather than treating it as an error by itself.",
+      "type": "timeseries",
+      "fieldConfig": {"defaults": {"unit": "s"}, "overrides": []},
+      "targets": [{"expr": "time() - hermes_lcm_latest_summary_timestamp_seconds{job=\"hermes_lcm\", profile=~\"$profile\"}", "legendFormat": "{{profile}}"}],
+      "gridPos": {"h": 8, "w": 8, "x": 16, "y": 5}
+    },
+    {
+      "id": 4,
+      "title": "Summary tokens represented",
+      "description": "Compares source history represented by summary nodes with the tokens stored in those summaries. The source series is the estimated token volume of material covered by summaries; the summary series is the compact retained text. The gap between them is the basis for the compression ratio and shows the amount of abstraction LCM is holding.",
+      "type": "timeseries",
+      "fieldConfig": {"defaults": {"unit": "short"}, "overrides": []},
+      "targets": [
+        {"expr": "hermes_lcm_summary_source_tokens_total{job=\"hermes_lcm\", profile=~\"$profile\"}", "legendFormat": "{{profile}} source"},
+        {"expr": "hermes_lcm_summary_tokens_total{job=\"hermes_lcm\", profile=~\"$profile\"}", "legendFormat": "{{profile}} summary"}
+      ],
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 13}
+    },
+    {
+      "id": 5,
+      "title": "Summary nodes by depth",
+      "description": "Count of persisted LCM summary-DAG nodes grouped by depth. Depth 0 nodes are leaf summaries over raw message ranges. Depth 1 and higher nodes summarize lower-depth summaries, so growth at higher depths means older history is being represented through additional consolidation layers. This is profile-wide, not limited to the current chat session.",
+      "type": "timeseries",
+      "fieldConfig": {"defaults": {"min": 0}, "overrides": []},
+      "targets": [{"expr": "hermes_lcm_summary_nodes_by_depth{job=\"hermes_lcm\", profile=~\"$profile\"}", "legendFormat": "{{profile}} depth {{depth}}"}],
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 13}
+    },
+    {
+      "id": 6,
+      "title": "Lifecycle compaction debt",
+      "description": "Conversations that LCM has marked as needing lifecycle maintenance and the estimated token volume involved. Zero is normally healthy. Sustained non-zero values indicate outstanding maintenance work; they do not, by themselves, prove a failed compaction. The two series use different units, so compare their trend rather than their numeric heights.",
+      "type": "timeseries",
+      "fieldConfig": {"defaults": {"min": 0}, "overrides": []},
+      "targets": [
+        {"expr": "hermes_lcm_lifecycle_debt_conversations{job=\"hermes_lcm\", profile=~\"$profile\"}", "legendFormat": "{{profile}} conversations"},
+        {"expr": "hermes_lcm_lifecycle_debt_tokens{job=\"hermes_lcm\", profile=~\"$profile\"}", "legendFormat": "{{profile}} estimated tokens"}
+      ],
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 21}
+    },
+    {
+      "id": 7,
+      "title": "Stored messages and estimated tokens",
+      "description": "Underlying raw LCM message-record count and an estimated token volume for the selected profile. These measure retained stored history, not the smaller prompt context currently sent to the model. Persistent growth is expected over time; use it with database size and summary-node depth to assess storage and structural growth.",
+      "type": "timeseries",
+      "fieldConfig": {"defaults": {"min": 0}, "overrides": []},
+      "targets": [
+        {"expr": "hermes_lcm_messages_total{job=\"hermes_lcm\", profile=~\"$profile\"}", "legendFormat": "{{profile}} messages"},
+        {"expr": "hermes_lcm_message_tokens_estimate{job=\"hermes_lcm\", profile=~\"$profile\"}", "legendFormat": "{{profile}} estimated tokens"}
+      ],
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 21}
+    }
+  ],
+  "schemaVersion": 41,
+  "tags": ["hermes", "lcm", "compaction"],
+  "templating": {
+    "list": [{
+      "name": "profile",
+      "label": "Agent profile",
+      "type": "query",
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "definition": "label_values(hermes_lcm_exporter_up{job=\"hermes_lcm\"}, profile)",
+      "query": {"query": "label_values(hermes_lcm_exporter_up{job=\"hermes_lcm\"}, profile)", "refId": "PrometheusVariableQueryEditor-VariableQuery"},
+      "refresh": 1,
+      "sort": 1,
+      "multi": true,
+      "includeAll": true,
+      "allValue": ".*",
+      "current": {"text": "All", "value": "$__all"},
+      "hide": 0,
+      "options": []
+    }]
+  },
+  "time": {"from": "now-6h", "to": "now"},
+  "timezone": "browser",
+  "title": "Hermes LCM Overview",
+  "uid": "hermes-lcm-overview",
+  "version": 1
+}

@@ -8,4 +8,13 @@ providers:
     disableDeletion: true
     updateIntervalSeconds: 30
     options:
-      path: /var/lib/grafana/dashboards
+      path: /var/lib/grafana/dashboards/inference
+
+  - name: hermes-lcm
+    orgId: 1
+    folder: Hermes LCM
+    type: file
+    disableDeletion: true
+    updateIntervalSeconds: 30
+    options:
+      path: /var/lib/grafana/dashboards/lcm
