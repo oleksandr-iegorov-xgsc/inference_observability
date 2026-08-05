@@ -73,7 +73,7 @@
       "title": "KV cache utilization",
       "description": "Highest reported vLLM KV-cache usage percentage for each selected instance. Sustained high values indicate cache pressure and can precede queueing or request failures. It is model-instance scope, not a physical-GPU allocation measurement.",
       "type": "timeseries",
-      "fieldConfig": {"defaults": {"unit": "percent"}, "overrides": []},
+      "fieldConfig": {"defaults": {"unit": "percentunit"}, "overrides": []},
       "targets": [
         {"expr": "max by (host, model, vllm_instance) (vllm:kv_cache_usage_perc{job=\"vllm\", host=~\"$host\", model=~\"$model\"})", "legendFormat": "{{host}} / {{model}} / {{vllm_instance}}"}
       ],
