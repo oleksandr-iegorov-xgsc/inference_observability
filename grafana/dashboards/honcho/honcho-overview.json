@@ -11,7 +11,7 @@
       "type": "text",
       "options": {
         "mode": "markdown",
-        "content": "## Honcho operational state\n\nAll data is collected by a dedicated, read-only PostgreSQL role through aggregate-only queries. Choose one **Workspace** at a time. Document and queue panels then repeat into one chart per document level or queue task type, respectively; their legends show only the deletion/state dimension. **Exporter health** confirms current database access; queue and embedding series show workflow backlog/state, not individual customer or agent activity."
+        "content": "## Honcho operational state\n\nAll data is collected by a dedicated, read-only PostgreSQL role through aggregate-only queries. The **Workspace** selector accepts one, many, or All workspaces. Document levels and queue workflows have concrete separate charts: they do not depend on Grafana repeat-template expansion. Each chart retains a distinct workspace-labelled series, so multi-workspace selections are never silently aggregated. **Exporter health** confirms current database access; queue and embedding series show workflow backlog/state, not individual customer or agent activity."
       },
       "gridPos": {
         "h": 5,
@@ -127,9 +127,9 @@
       }
     },
     {
-      "id": 6,
-      "title": "$workspace $document_level documents by deletion state",
-      "description": "One chart per selected workspace and document level. The two series are stored documents with deleted=false and deleted=true. With Workspace=All, each level chart retains a distinct series per workspace so no workspace totals are silently combined. It does not export document contents, source IDs, or peer identities.",
+      "id": 60,
+      "title": "$workspace explicit documents by deletion state",
+      "description": "Document count at the explicit level. Each selected workspace remains its own series; deleted=false and deleted=true are never combined.",
       "type": "timeseries",
       "fieldConfig": {
         "defaults": {
@@ -139,18 +139,63 @@
       },
       "targets": [
         {
-          "expr": "honcho_workspace_documents{job=\"honcho\", workspace=~\"$workspace\", level=~\"$document_level\"}",
+          "expr": "honcho_workspace_documents{job=\"honcho\", workspace=~\"$workspace\", level=\"explicit\"}",
           "legendFormat": "{{workspace}} deleted={{deleted}}"
         }
       ],
-      "repeat": "document_level",
-      "repeatDirection": "h",
-      "maxPerRow": 2,
       "gridPos": {
         "h": 8,
         "w": 12,
         "x": 12,
         "y": 13
+      }
+    },
+    {
+      "id": 61,
+      "title": "$workspace deductive documents by deletion state",
+      "description": "Document count at the deductive level. Each selected workspace remains its own series; deleted=false and deleted=true are never combined.",
+      "type": "timeseries",
+      "fieldConfig": {
+        "defaults": {
+          "min": 0
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "honcho_workspace_documents{job=\"honcho\", workspace=~\"$workspace\", level=\"deductive\"}",
+          "legendFormat": "{{workspace}} deleted={{deleted}}"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 21
+      }
+    },
+    {
+      "id": 62,
+      "title": "$workspace inductive documents by deletion state",
+      "description": "Document count at the inductive level. Each selected workspace remains its own series; deleted=false and deleted=true are never combined.",
+      "type": "timeseries",
+      "fieldConfig": {
+        "defaults": {
+          "min": 0
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "honcho_workspace_documents{job=\"honcho\", workspace=~\"$workspace\", level=\"inductive\"}",
+          "legendFormat": "{{workspace}} deleted={{deleted}}"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 21
       }
     },
     {
@@ -178,13 +223,13 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 21
+        "y": 29
       }
     },
     {
-      "id": 8,
-      "title": "$workspace $queue_task_type queue items by state",
-      "description": "One chart per selected workspace and queue task type. The series are pending, in_progress, and completed counts. With Workspace=All, each task-type chart retains a distinct series per workspace so no workspace totals are silently combined. In-progress is derived from the active queue-session table; pending age is shown separately.",
+      "id": 63,
+      "title": "$workspace contradiction documents by deletion state",
+      "description": "Document count at the contradiction level. Each selected workspace remains its own series; deleted=false and deleted=true are never combined.",
       "type": "timeseries",
       "fieldConfig": {
         "defaults": {
@@ -194,7 +239,55 @@
       },
       "targets": [
         {
-          "expr": "honcho_workspace_queue_items{job=\"honcho\", workspace=~\"$workspace\", task_type=~\"$queue_task_type\"}",
+          "expr": "honcho_workspace_documents{job=\"honcho\", workspace=~\"$workspace\", level=\"contradiction\"}",
+          "legendFormat": "{{workspace}} deleted={{deleted}}"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 29
+      }
+    },
+    {
+      "id": 70,
+      "title": "$workspace webhook queue items by state",
+      "description": "Queue item count for the webhook workflow. Each selected workspace remains its own series; pending, in_progress, and completed are separate states.",
+      "type": "timeseries",
+      "fieldConfig": {
+        "defaults": {
+          "min": 0
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "honcho_workspace_queue_items{job=\"honcho\", workspace=~\"$workspace\", task_type=\"webhook\"}",
+          "legendFormat": "{{workspace}} {{state}}"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 37
+      }
+    },
+    {
+      "id": 71,
+      "title": "$workspace summary queue items by state",
+      "description": "Queue item count for the summary workflow. Each selected workspace remains its own series; pending, in_progress, and completed are separate states.",
+      "type": "timeseries",
+      "fieldConfig": {
+        "defaults": {
+          "min": 0
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "honcho_workspace_queue_items{job=\"honcho\", workspace=~\"$workspace\", task_type=\"summary\"}",
           "legendFormat": "{{workspace}} {{state}}"
         }
       ],
@@ -202,11 +295,56 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 21
+        "y": 37
+      }
+    },
+    {
+      "id": 72,
+      "title": "$workspace representation queue items by state",
+      "description": "Queue item count for the representation workflow. Each selected workspace remains its own series; pending, in_progress, and completed are separate states.",
+      "type": "timeseries",
+      "fieldConfig": {
+        "defaults": {
+          "min": 0
+        },
+        "overrides": []
       },
-      "repeat": "queue_task_type",
-      "repeatDirection": "h",
-      "maxPerRow": 2
+      "targets": [
+        {
+          "expr": "honcho_workspace_queue_items{job=\"honcho\", workspace=~\"$workspace\", task_type=\"representation\"}",
+          "legendFormat": "{{workspace}} {{state}}"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 45
+      }
+    },
+    {
+      "id": 73,
+      "title": "$workspace dream queue items by state",
+      "description": "Queue item count for the dream workflow. Each selected workspace remains its own series; pending, in_progress, and completed are separate states.",
+      "type": "timeseries",
+      "fieldConfig": {
+        "defaults": {
+          "min": 0
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "honcho_workspace_queue_items{job=\"honcho\", workspace=~\"$workspace\", task_type=\"dream\"}",
+          "legendFormat": "{{workspace}} {{state}}"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 45
+      }
     },
     {
       "id": 9,
@@ -230,7 +368,31 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 29
+        "y": 61
+      }
+    },
+    {
+      "id": 74,
+      "title": "$workspace deletion queue items by state",
+      "description": "Queue item count for the deletion workflow. Each selected workspace remains its own series; pending, in_progress, and completed are separate states.",
+      "type": "timeseries",
+      "fieldConfig": {
+        "defaults": {
+          "min": 0
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "honcho_workspace_queue_items{job=\"honcho\", workspace=~\"$workspace\", task_type=\"deletion\"}",
+          "legendFormat": "{{workspace}} {{state}}"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 53
       }
     },
     {
@@ -254,7 +416,31 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 29
+        "y": 61
+      }
+    },
+    {
+      "id": 75,
+      "title": "$workspace reconciler queue items by state",
+      "description": "Queue item count for the reconciler workflow. Each selected workspace remains its own series; pending, in_progress, and completed are separate states.",
+      "type": "timeseries",
+      "fieldConfig": {
+        "defaults": {
+          "min": 0
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "honcho_workspace_queue_items{job=\"honcho\", workspace=~\"$workspace\", task_type=\"reconciler\"}",
+          "legendFormat": "{{workspace}} {{state}}"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 53
       }
     },
     {
@@ -279,7 +465,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 37
+        "y": 69
       }
     },
     {
@@ -305,7 +491,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 37
+        "y": 69
       }
     },
     {
@@ -331,7 +517,7 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 45
+        "y": 77
       }
     }
   ],
@@ -367,56 +553,6 @@
         "hide": 0,
         "options": [],
         "allValue": ".*"
-      },
-      {
-        "name": "document_level",
-        "label": "Document level",
-        "type": "query",
-        "datasource": {
-          "type": "prometheus",
-          "uid": "prometheus"
-        },
-        "definition": "label_values(honcho_workspace_documents{job=\"honcho\", workspace=~\"$workspace\"}, document_level)",
-        "query": {
-          "query": "label_values(honcho_workspace_documents{job=\"honcho\", workspace=~\"$workspace\"}, document_level)",
-          "refId": "PrometheusVariableQueryEditor-VariableQuery"
-        },
-        "refresh": 1,
-        "sort": 1,
-        "multi": true,
-        "includeAll": true,
-        "allValue": ".*",
-        "current": {
-          "text": "All",
-          "value": "$__all"
-        },
-        "hide": 2,
-        "options": []
-      },
-      {
-        "name": "queue_task_type",
-        "label": "Queue task type",
-        "type": "query",
-        "datasource": {
-          "type": "prometheus",
-          "uid": "prometheus"
-        },
-        "definition": "label_values(honcho_workspace_queue_items{job=\"honcho\", workspace=~\"$workspace\"}, queue_task_type)",
-        "query": {
-          "query": "label_values(honcho_workspace_queue_items{job=\"honcho\", workspace=~\"$workspace\"}, queue_task_type)",
-          "refId": "PrometheusVariableQueryEditor-VariableQuery"
-        },
-        "refresh": 1,
-        "sort": 1,
-        "multi": true,
-        "includeAll": true,
-        "allValue": ".*",
-        "current": {
-          "text": "All",
-          "value": "$__all"
-        },
-        "hide": 2,
-        "options": []
       }
     ]
   },
