@@ -6,6 +6,22 @@
   "editable": false,
   "panels": [
     {
+      "id": 50,
+      "title": "General information",
+      "type": "text",
+      "transparent": true,
+      "options": {
+        "mode": "markdown",
+        "content": "## General information\nWorkspace health, aggregate memory structure, synchronization, backlog age, and native deriver throughput."
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
       "id": 1,
       "title": "How to read this dashboard",
       "type": "text",
@@ -17,7 +33,7 @@
         "h": 5,
         "w": 24,
         "x": 0,
-        "y": 0
+        "y": 2
       }
     },
     {
@@ -42,7 +58,7 @@
         "h": 8,
         "w": 8,
         "x": 0,
-        "y": 5
+        "y": 7
       }
     },
     {
@@ -67,7 +83,7 @@
         "h": 8,
         "w": 8,
         "x": 8,
-        "y": 5
+        "y": 7
       }
     },
     {
@@ -95,7 +111,7 @@
         "h": 8,
         "w": 8,
         "x": 16,
-        "y": 5
+        "y": 7
       }
     },
     {
@@ -123,79 +139,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 13
-      }
-    },
-    {
-      "id": 60,
-      "title": "$workspace explicit documents by deletion state",
-      "description": "Document count at the explicit level. Each selected workspace remains its own series; deleted=false and deleted=true are never combined.",
-      "type": "timeseries",
-      "fieldConfig": {
-        "defaults": {
-          "min": 0
-        },
-        "overrides": []
-      },
-      "targets": [
-        {
-          "expr": "honcho_workspace_documents{job=\"honcho\", workspace=~\"$workspace\", level=\"explicit\"}",
-          "legendFormat": "{{workspace}} deleted={{deleted}}"
-        }
-      ],
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 13
-      }
-    },
-    {
-      "id": 61,
-      "title": "$workspace deductive documents by deletion state",
-      "description": "Document count at the deductive level. Each selected workspace remains its own series; deleted=false and deleted=true are never combined.",
-      "type": "timeseries",
-      "fieldConfig": {
-        "defaults": {
-          "min": 0
-        },
-        "overrides": []
-      },
-      "targets": [
-        {
-          "expr": "honcho_workspace_documents{job=\"honcho\", workspace=~\"$workspace\", level=\"deductive\"}",
-          "legendFormat": "{{workspace}} deleted={{deleted}}"
-        }
-      ],
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 21
-      }
-    },
-    {
-      "id": 62,
-      "title": "$workspace inductive documents by deletion state",
-      "description": "Document count at the inductive level. Each selected workspace remains its own series; deleted=false and deleted=true are never combined.",
-      "type": "timeseries",
-      "fieldConfig": {
-        "defaults": {
-          "min": 0
-        },
-        "overrides": []
-      },
-      "targets": [
-        {
-          "expr": "honcho_workspace_documents{job=\"honcho\", workspace=~\"$workspace\", level=\"inductive\"}",
-          "legendFormat": "{{workspace}} deleted={{deleted}}"
-        }
-      ],
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 21
+        "y": 15
       }
     },
     {
@@ -222,128 +166,8 @@
       "gridPos": {
         "h": 8,
         "w": 12,
-        "x": 0,
-        "y": 29
-      }
-    },
-    {
-      "id": 63,
-      "title": "$workspace contradiction documents by deletion state",
-      "description": "Document count at the contradiction level. Each selected workspace remains its own series; deleted=false and deleted=true are never combined.",
-      "type": "timeseries",
-      "fieldConfig": {
-        "defaults": {
-          "min": 0
-        },
-        "overrides": []
-      },
-      "targets": [
-        {
-          "expr": "honcho_workspace_documents{job=\"honcho\", workspace=~\"$workspace\", level=\"contradiction\"}",
-          "legendFormat": "{{workspace}} deleted={{deleted}}"
-        }
-      ],
-      "gridPos": {
-        "h": 8,
-        "w": 12,
         "x": 12,
-        "y": 29
-      }
-    },
-    {
-      "id": 70,
-      "title": "$workspace webhook queue items by state",
-      "description": "Queue item count for the webhook workflow. Each selected workspace remains its own series; pending, in_progress, and completed are separate states.",
-      "type": "timeseries",
-      "fieldConfig": {
-        "defaults": {
-          "min": 0
-        },
-        "overrides": []
-      },
-      "targets": [
-        {
-          "expr": "honcho_workspace_queue_items{job=\"honcho\", workspace=~\"$workspace\", task_type=\"webhook\"}",
-          "legendFormat": "{{workspace}} {{state}}"
-        }
-      ],
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 37
-      }
-    },
-    {
-      "id": 71,
-      "title": "$workspace summary queue items by state",
-      "description": "Queue item count for the summary workflow. Each selected workspace remains its own series; pending, in_progress, and completed are separate states.",
-      "type": "timeseries",
-      "fieldConfig": {
-        "defaults": {
-          "min": 0
-        },
-        "overrides": []
-      },
-      "targets": [
-        {
-          "expr": "honcho_workspace_queue_items{job=\"honcho\", workspace=~\"$workspace\", task_type=\"summary\"}",
-          "legendFormat": "{{workspace}} {{state}}"
-        }
-      ],
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 37
-      }
-    },
-    {
-      "id": 72,
-      "title": "$workspace representation queue items by state",
-      "description": "Queue item count for the representation workflow. Each selected workspace remains its own series; pending, in_progress, and completed are separate states.",
-      "type": "timeseries",
-      "fieldConfig": {
-        "defaults": {
-          "min": 0
-        },
-        "overrides": []
-      },
-      "targets": [
-        {
-          "expr": "honcho_workspace_queue_items{job=\"honcho\", workspace=~\"$workspace\", task_type=\"representation\"}",
-          "legendFormat": "{{workspace}} {{state}}"
-        }
-      ],
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 45
-      }
-    },
-    {
-      "id": 73,
-      "title": "$workspace dream queue items by state",
-      "description": "Queue item count for the dream workflow. Each selected workspace remains its own series; pending, in_progress, and completed are separate states.",
-      "type": "timeseries",
-      "fieldConfig": {
-        "defaults": {
-          "min": 0
-        },
-        "overrides": []
-      },
-      "targets": [
-        {
-          "expr": "honcho_workspace_queue_items{job=\"honcho\", workspace=~\"$workspace\", task_type=\"dream\"}",
-          "legendFormat": "{{workspace}} {{state}}"
-        }
-      ],
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 45
+        "y": 15
       }
     },
     {
@@ -368,31 +192,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 61
-      }
-    },
-    {
-      "id": 74,
-      "title": "$workspace deletion queue items by state",
-      "description": "Queue item count for the deletion workflow. Each selected workspace remains its own series; pending, in_progress, and completed are separate states.",
-      "type": "timeseries",
-      "fieldConfig": {
-        "defaults": {
-          "min": 0
-        },
-        "overrides": []
-      },
-      "targets": [
-        {
-          "expr": "honcho_workspace_queue_items{job=\"honcho\", workspace=~\"$workspace\", task_type=\"deletion\"}",
-          "legendFormat": "{{workspace}} {{state}}"
-        }
-      ],
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 53
+        "y": 23
       }
     },
     {
@@ -416,31 +216,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 61
-      }
-    },
-    {
-      "id": 75,
-      "title": "$workspace reconciler queue items by state",
-      "description": "Queue item count for the reconciler workflow. Each selected workspace remains its own series; pending, in_progress, and completed are separate states.",
-      "type": "timeseries",
-      "fieldConfig": {
-        "defaults": {
-          "min": 0
-        },
-        "overrides": []
-      },
-      "targets": [
-        {
-          "expr": "honcho_workspace_queue_items{job=\"honcho\", workspace=~\"$workspace\", task_type=\"reconciler\"}",
-          "legendFormat": "{{workspace}} {{state}}"
-        }
-      ],
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 53
+        "y": 23
       }
     },
     {
@@ -465,7 +241,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 69
+        "y": 31
       }
     },
     {
@@ -491,7 +267,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 69
+        "y": 31
       }
     },
     {
@@ -517,7 +293,279 @@
         "h": 8,
         "w": 24,
         "x": 0,
+        "y": 39
+      }
+    },
+    {
+      "id": 51,
+      "title": "Documents by deletion state",
+      "type": "text",
+      "transparent": true,
+      "options": {
+        "mode": "markdown",
+        "content": "## Documents by deletion state\nOne chart per document level; each chart keeps `deleted=false` and `deleted=true` as distinct series."
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 24,
+        "x": 0,
+        "y": 47
+      }
+    },
+    {
+      "id": 60,
+      "title": "$workspace explicit documents by deletion state",
+      "description": "Document count at the explicit level. Each selected workspace remains its own series; deleted=false and deleted=true are never combined.",
+      "type": "timeseries",
+      "fieldConfig": {
+        "defaults": {
+          "min": 0
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "honcho_workspace_documents{job=\"honcho\", workspace=~\"$workspace\", level=\"explicit\"}",
+          "legendFormat": "{{workspace}} deleted={{deleted}}"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 49
+      }
+    },
+    {
+      "id": 61,
+      "title": "$workspace deductive documents by deletion state",
+      "description": "Document count at the deductive level. Each selected workspace remains its own series; deleted=false and deleted=true are never combined.",
+      "type": "timeseries",
+      "fieldConfig": {
+        "defaults": {
+          "min": 0
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "honcho_workspace_documents{job=\"honcho\", workspace=~\"$workspace\", level=\"deductive\"}",
+          "legendFormat": "{{workspace}} deleted={{deleted}}"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 49
+      }
+    },
+    {
+      "id": 62,
+      "title": "$workspace inductive documents by deletion state",
+      "description": "Document count at the inductive level. Each selected workspace remains its own series; deleted=false and deleted=true are never combined.",
+      "type": "timeseries",
+      "fieldConfig": {
+        "defaults": {
+          "min": 0
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "honcho_workspace_documents{job=\"honcho\", workspace=~\"$workspace\", level=\"inductive\"}",
+          "legendFormat": "{{workspace}} deleted={{deleted}}"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 57
+      }
+    },
+    {
+      "id": 63,
+      "title": "$workspace contradiction documents by deletion state",
+      "description": "Document count at the contradiction level. Each selected workspace remains its own series; deleted=false and deleted=true are never combined.",
+      "type": "timeseries",
+      "fieldConfig": {
+        "defaults": {
+          "min": 0
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "honcho_workspace_documents{job=\"honcho\", workspace=~\"$workspace\", level=\"contradiction\"}",
+          "legendFormat": "{{workspace}} deleted={{deleted}}"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 57
+      }
+    },
+    {
+      "id": 52,
+      "title": "Queue items by state",
+      "type": "text",
+      "transparent": true,
+      "options": {
+        "mode": "markdown",
+        "content": "## Queue items by state\nOne chart per workflow; each chart keeps `pending`, `in_progress`, and `completed` as distinct series."
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 24,
+        "x": 0,
+        "y": 67
+      }
+    },
+    {
+      "id": 70,
+      "title": "$workspace webhook queue items by state",
+      "description": "Queue item count for the webhook workflow. Each selected workspace remains its own series; pending, in_progress, and completed are separate states.",
+      "type": "timeseries",
+      "fieldConfig": {
+        "defaults": {
+          "min": 0
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "honcho_workspace_queue_items{job=\"honcho\", workspace=~\"$workspace\", task_type=\"webhook\"}",
+          "legendFormat": "{{workspace}} {{state}}"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 69
+      }
+    },
+    {
+      "id": 71,
+      "title": "$workspace summary queue items by state",
+      "description": "Queue item count for the summary workflow. Each selected workspace remains its own series; pending, in_progress, and completed are separate states.",
+      "type": "timeseries",
+      "fieldConfig": {
+        "defaults": {
+          "min": 0
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "honcho_workspace_queue_items{job=\"honcho\", workspace=~\"$workspace\", task_type=\"summary\"}",
+          "legendFormat": "{{workspace}} {{state}}"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 69
+      }
+    },
+    {
+      "id": 72,
+      "title": "$workspace representation queue items by state",
+      "description": "Queue item count for the representation workflow. Each selected workspace remains its own series; pending, in_progress, and completed are separate states.",
+      "type": "timeseries",
+      "fieldConfig": {
+        "defaults": {
+          "min": 0
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "honcho_workspace_queue_items{job=\"honcho\", workspace=~\"$workspace\", task_type=\"representation\"}",
+          "legendFormat": "{{workspace}} {{state}}"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
         "y": 77
+      }
+    },
+    {
+      "id": 73,
+      "title": "$workspace dream queue items by state",
+      "description": "Queue item count for the dream workflow. Each selected workspace remains its own series; pending, in_progress, and completed are separate states.",
+      "type": "timeseries",
+      "fieldConfig": {
+        "defaults": {
+          "min": 0
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "honcho_workspace_queue_items{job=\"honcho\", workspace=~\"$workspace\", task_type=\"dream\"}",
+          "legendFormat": "{{workspace}} {{state}}"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 77
+      }
+    },
+    {
+      "id": 74,
+      "title": "$workspace deletion queue items by state",
+      "description": "Queue item count for the deletion workflow. Each selected workspace remains its own series; pending, in_progress, and completed are separate states.",
+      "type": "timeseries",
+      "fieldConfig": {
+        "defaults": {
+          "min": 0
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "honcho_workspace_queue_items{job=\"honcho\", workspace=~\"$workspace\", task_type=\"deletion\"}",
+          "legendFormat": "{{workspace}} {{state}}"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 85
+      }
+    },
+    {
+      "id": 75,
+      "title": "$workspace reconciler queue items by state",
+      "description": "Queue item count for the reconciler workflow. Each selected workspace remains its own series; pending, in_progress, and completed are separate states.",
+      "type": "timeseries",
+      "fieldConfig": {
+        "defaults": {
+          "min": 0
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "honcho_workspace_queue_items{job=\"honcho\", workspace=~\"$workspace\", task_type=\"reconciler\"}",
+          "legendFormat": "{{workspace}} {{state}}"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 85
       }
     }
   ],
