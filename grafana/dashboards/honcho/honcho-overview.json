@@ -111,16 +111,21 @@
     },
     {
       "id": 12,
-      "title": "Native deriver token throughput",
-      "description": "Rate of tokens processed by the native Honcho deriver process. This is process throughput and is not a count of stored Honcho message tokens.",
+      "title": "Native deriver generated-token throughput",
+      "description": "Generated output tokens per second, grouped by deriver task type. This uses only component=output_total and token_type=output. Unlike the input accounting components, these series can be read as output-token throughput and are not an overlapping breakdown.",
       "type": "timeseries",
-      "fieldConfig": {"defaults": {"unit": "ops", "min": 0}, "overrides": []},
-      "targets": [
-        {"expr": "rate(deriver_tokens_processed_total{job=\"honcho_deriver\"}[5m])", "legendFormat": "deriver tokens/s"},
-        {"expr": "rate(dialectic_tokens_processed_total{job=\"honcho_deriver\"}[5m])", "legendFormat": "dialectic tokens/s"},
-        {"expr": "rate(dreamer_tokens_processed_total{job=\"honcho_deriver\"}[5m])", "legendFormat": "dreamer tokens/s"}
-      ],
+      "fieldConfig": {"defaults": {"unit": "ops", "min": 0, "decimals": 2}, "overrides": []},
+      "targets": [{"expr": "sum by (task_type) (rate(deriver_tokens_processed_total{job=\"honcho_deriver\", token_type=\"output\", component=\"output_total\"}[5m]))", "legendFormat": "{{task_type}} output tokens/s"}],
       "gridPos": {"h": 8, "w": 12, "x": 12, "y": 37}
+    },
+    {
+      "id": 13,
+      "title": "Native deriver input-token accounting components (not additive)",
+      "description": "Input-token rates as reported by the native deriver. prompt, messages, and previous_summary are overlapping accounting components for the same work, so do NOT sum them into a total. This panel exposes the breakdown rather than hiding it.",
+      "type": "timeseries",
+      "fieldConfig": {"defaults": {"unit": "ops", "min": 0, "decimals": 2}, "overrides": []},
+      "targets": [{"expr": "rate(deriver_tokens_processed_total{job=\"honcho_deriver\", token_type=\"input\"}[5m])", "legendFormat": "{{task_type}} input / {{component}} tokens/s"}],
+      "gridPos": {"h": 8, "w": 24, "x": 0, "y": 45}
     }
   ],
   "schemaVersion": 41,
