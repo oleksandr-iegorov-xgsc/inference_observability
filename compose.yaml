@@ -1,4 +1,32 @@
 services:
+  honcho-exporter:
+    build:
+      context: ../honcho-prometheus-exporter
+    image: ${HONCHO_EXPORTER_IMAGE:-honcho-prometheus-exporter:local}
+    container_name: honcho-exporter
+    network_mode: host
+    env_file:
+      - ./honcho-exporter/exporter.env
+    command:
+      - --config
+      - /etc/honcho-exporter/config.json
+    volumes:
+      - ./honcho-exporter/config.json:/etc/honcho-exporter/config.json:ro,Z
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:9477/healthz')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+
   hermes-lcm-exporter:
     build:
       context: ../hermes-lcm-prometheus-exporter

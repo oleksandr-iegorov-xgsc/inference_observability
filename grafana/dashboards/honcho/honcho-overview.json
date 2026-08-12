@@ -1,0 +1,112 @@
+{
+  "annotations": {"list": []},
+  "description": "Read-only, aggregate operational state for Honcho workspaces. No message, document, peer, session, or queue payload content is exported.",
+  "editable": false,
+  "panels": [
+    {
+      "id": 1,
+      "title": "How to read this dashboard",
+      "type": "text",
+      "options": {"mode": "markdown", "content": "## Honcho operational state\n\nAll data is collected by a dedicated, read-only PostgreSQL role through aggregate-only queries. The `workspace` selector is deliberately bounded. **Exporter health** confirms current database access; queue and embedding series show workflow backlog/state, not individual customer or agent activity."},
+      "gridPos": {"h": 5, "w": 24, "x": 0, "y": 0}
+    },
+    {
+      "id": 2,
+      "title": "Exporter / database health",
+      "description": "1 means the latest aggregate-only PostgreSQL snapshot succeeded; 0 means it failed. This is access/collection health, not the state of a specific queue task.",
+      "type": "timeseries",
+      "fieldConfig": {"defaults": {"min": 0, "max": 1}, "overrides": []},
+      "targets": [{"expr": "honcho_exporter_up{job=\"honcho\"}", "legendFormat": "{{workspace}}"}],
+      "gridPos": {"h": 8, "w": 8, "x": 0, "y": 5}
+    },
+    {
+      "id": 3,
+      "title": "Scrape duration",
+      "description": "Wall-clock duration of the latest exporter aggregate snapshot. Sustained increases can indicate database load or an inefficient query plan.",
+      "type": "timeseries",
+      "fieldConfig": {"defaults": {"unit": "s", "min": 0}, "overrides": []},
+      "targets": [{"expr": "honcho_exporter_scrape_duration_seconds{job=\"honcho\"}", "legendFormat": "snapshot"}],
+      "gridPos": {"h": 8, "w": 8, "x": 8, "y": 5}
+    },
+    {
+      "id": 4,
+      "title": "Sessions and peers",
+      "description": "Current aggregate peer count and active/inactive session counts. These are counts only; no names or identifiers are exported.",
+      "type": "timeseries",
+      "fieldConfig": {"defaults": {"min": 0}, "overrides": []},
+      "targets": [
+        {"expr": "honcho_workspace_peers{job=\"honcho\", workspace=~\"$workspace\"}", "legendFormat": "{{workspace}} peers"},
+        {"expr": "honcho_workspace_sessions{job=\"honcho\", workspace=~\"$workspace\"}", "legendFormat": "{{workspace}} {{state}} sessions"}
+      ],
+      "gridPos": {"h": 8, "w": 8, "x": 16, "y": 5}
+    },
+    {
+      "id": 5,
+      "title": "Messages and tokens",
+      "description": "Stored aggregate message count and aggregate token count. These are retained database totals rather than the current context window or traffic rate.",
+      "type": "timeseries",
+      "fieldConfig": {"defaults": {"min": 0}, "overrides": []},
+      "targets": [
+        {"expr": "honcho_workspace_messages{job=\"honcho\", workspace=~\"$workspace\"}", "legendFormat": "{{workspace}} messages"},
+        {"expr": "honcho_workspace_message_tokens{job=\"honcho\", workspace=~\"$workspace\"}", "legendFormat": "{{workspace}} tokens"}
+      ],
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 13}
+    },
+    {
+      "id": 6,
+      "title": "Documents by level and deletion state",
+      "description": "Aggregate documents grouped only by fixed document level and deletion state. It does not export document contents, source IDs, or peer identities.",
+      "type": "timeseries",
+      "fieldConfig": {"defaults": {"min": 0}, "overrides": []},
+      "targets": [{"expr": "honcho_workspace_documents{job=\"honcho\", workspace=~\"$workspace\"}", "legendFormat": "{{workspace}} {{level}} deleted={{deleted}}"}],
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 13}
+    },
+    {
+      "id": 7,
+      "title": "Embedding synchronization state",
+      "description": "Aggregate document and message embedding rows grouped by bounded sync state. A persistent pending or failed population indicates reconciliation work to investigate.",
+      "type": "timeseries",
+      "fieldConfig": {"defaults": {"min": 0}, "overrides": []},
+      "targets": [
+        {"expr": "honcho_workspace_document_embeddings{job=\"honcho\", workspace=~\"$workspace\"}", "legendFormat": "{{workspace}} document {{sync_state}}"},
+        {"expr": "honcho_workspace_message_embeddings{job=\"honcho\", workspace=~\"$workspace\"}", "legendFormat": "{{workspace}} message {{sync_state}}"}
+      ],
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 21}
+    },
+    {
+      "id": 8,
+      "title": "Queue items by type and state",
+      "description": "Aggregate queue work grouped by bounded task type and state. In-progress is derived from the active queue-session table; pending age is shown separately.",
+      "type": "timeseries",
+      "fieldConfig": {"defaults": {"min": 0}, "overrides": []},
+      "targets": [{"expr": "honcho_workspace_queue_items{job=\"honcho\", workspace=~\"$workspace\"}", "legendFormat": "{{workspace}} {{task_type}} {{state}}"}],
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 21}
+    },
+    {
+      "id": 9,
+      "title": "Oldest pending work age",
+      "description": "Age of the oldest queue item that is pending (unprocessed and not active), grouped by bounded task type. A high value is backlog age, not runtime duration of an active task.",
+      "type": "timeseries",
+      "fieldConfig": {"defaults": {"unit": "s", "min": 0}, "overrides": []},
+      "targets": [{"expr": "honcho_workspace_oldest_pending_age_seconds{job=\"honcho\", workspace=~\"$workspace\"}", "legendFormat": "{{workspace}} {{task_type}}"}],
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 29}
+    },
+    {
+      "id": 10,
+      "title": "Active queue sessions",
+      "description": "Distinct active queue work-unit count. It should be interpreted with queue state counts; it does not expose any work-unit identifiers.",
+      "type": "timeseries",
+      "fieldConfig": {"defaults": {"min": 0}, "overrides": []},
+      "targets": [{"expr": "honcho_workspace_active_queue_sessions{job=\"honcho\", workspace=~\"$workspace\"}", "legendFormat": "{{workspace}}"}],
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 29}
+    }
+  ],
+  "schemaVersion": 41,
+  "tags": ["honcho", "postgresql", "operational"],
+  "templating": {"list": [{"name": "workspace", "label": "Workspace", "type": "query", "datasource": {"type": "prometheus", "uid": "prometheus"}, "definition": "label_values(honcho_workspace_peers{job=\"honcho\"}, workspace)", "query": {"query": "label_values(honcho_workspace_peers{job=\"honcho\"}, workspace)", "refId": "PrometheusVariableQueryEditor-VariableQuery"}, "refresh": 1, "sort": 1, "multi": true, "includeAll": true, "allValue": ".*", "current": {"text": "All", "value": "$__all"}, "hide": 0, "options": []}]},
+  "time": {"from": "now-6h", "to": "now"},
+  "timezone": "browser",
+  "title": "Honcho Overview",
+  "uid": "honcho-overview",
+  "version": 1
+}

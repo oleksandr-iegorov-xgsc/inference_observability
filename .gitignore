@@ -1,4 +1,5 @@
 .env
+honcho-exporter/exporter.env
 runtime/
 prometheus/targets/active/
 __pycache__/

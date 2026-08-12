@@ -18,3 +18,12 @@ providers:
     updateIntervalSeconds: 30
     options:
       path: /var/lib/grafana/dashboards/lcm
+
+  - name: honcho
+    orgId: 1
+    folder: Honcho
+    type: file
+    disableDeletion: true
+    updateIntervalSeconds: 30
+    options:
+      path: /var/lib/grafana/dashboards/honcho
