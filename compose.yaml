@@ -20,7 +20,9 @@ services:
     security_opt:
       - no-new-privileges:true
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:9477/healthz')"]
+      # A scalar CMD-SHELL form avoids podman-compose 1.0.6 corrupting an
+      # array-form Python command into invalid shell syntax.
+      test: python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:9477/healthz')"
       interval: 30s
       timeout: 5s
       retries: 3
@@ -53,7 +55,7 @@ services:
     security_opt:
       - no-new-privileges:true
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:9476/healthz')"]
+      test: python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:9476/healthz')"
       interval: 30s
       timeout: 5s
       retries: 3
