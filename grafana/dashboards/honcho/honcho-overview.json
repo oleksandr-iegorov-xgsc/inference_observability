@@ -129,7 +129,7 @@
     {
       "id": 6,
       "title": "$workspace $document_level documents by deletion state",
-      "description": "One chart per selected workspace and document level. The two series are stored documents with deleted=false and deleted=true. It does not export document contents, source IDs, or peer identities.",
+      "description": "One chart per selected workspace and document level. The two series are stored documents with deleted=false and deleted=true. With Workspace=All, each level chart retains a distinct series per workspace so no workspace totals are silently combined. It does not export document contents, source IDs, or peer identities.",
       "type": "timeseries",
       "fieldConfig": {
         "defaults": {
@@ -139,8 +139,8 @@
       },
       "targets": [
         {
-          "expr": "honcho_workspace_documents{job=\"honcho\", workspace=\"$workspace\", level=\"$document_level\"}",
-          "legendFormat": "deleted={{deleted}}"
+          "expr": "honcho_workspace_documents{job=\"honcho\", workspace=~\"$workspace\", level=~\"$document_level\"}",
+          "legendFormat": "{{workspace}} deleted={{deleted}}"
         }
       ],
       "repeat": "document_level",
@@ -184,7 +184,7 @@
     {
       "id": 8,
       "title": "$workspace $queue_task_type queue items by state",
-      "description": "One chart per selected workspace and queue task type. The series are pending, in_progress, and completed counts. In-progress is derived from the active queue-session table; pending age is shown separately.",
+      "description": "One chart per selected workspace and queue task type. The series are pending, in_progress, and completed counts. With Workspace=All, each task-type chart retains a distinct series per workspace so no workspace totals are silently combined. In-progress is derived from the active queue-session table; pending age is shown separately.",
       "type": "timeseries",
       "fieldConfig": {
         "defaults": {
@@ -194,8 +194,8 @@
       },
       "targets": [
         {
-          "expr": "honcho_workspace_queue_items{job=\"honcho\", workspace=\"$workspace\", task_type=\"$queue_task_type\"}",
-          "legendFormat": "{{state}}"
+          "expr": "honcho_workspace_queue_items{job=\"honcho\", workspace=~\"$workspace\", task_type=~\"$queue_task_type\"}",
+          "legendFormat": "{{workspace}} {{state}}"
         }
       ],
       "gridPos": {
@@ -358,14 +358,15 @@
         },
         "refresh": 1,
         "sort": 1,
-        "multi": false,
-        "includeAll": false,
+        "multi": true,
+        "includeAll": true,
         "current": {
-          "text": "hermes",
-          "value": "hermes"
+          "text": "All",
+          "value": "$__all"
         },
         "hide": 0,
-        "options": []
+        "options": [],
+        "allValue": ".*"
       },
       {
         "name": "document_level",
