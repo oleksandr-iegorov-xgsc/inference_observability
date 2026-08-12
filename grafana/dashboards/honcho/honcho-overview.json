@@ -1,5 +1,7 @@
 {
-  "annotations": {"list": []},
+  "annotations": {
+    "list": []
+  },
   "description": "Read-only, aggregate operational state for Honcho workspaces. No message, document, peer, session, or queue payload content is exported.",
   "editable": false,
   "panels": [
@@ -7,131 +9,420 @@
       "id": 1,
       "title": "How to read this dashboard",
       "type": "text",
-      "options": {"mode": "markdown", "content": "## Honcho operational state\n\nAll data is collected by a dedicated, read-only PostgreSQL role through aggregate-only queries. The `workspace` selector is deliberately bounded. **Exporter health** confirms current database access; queue and embedding series show workflow backlog/state, not individual customer or agent activity."},
-      "gridPos": {"h": 5, "w": 24, "x": 0, "y": 0}
+      "options": {
+        "mode": "markdown",
+        "content": "## Honcho operational state\n\nAll data is collected by a dedicated, read-only PostgreSQL role through aggregate-only queries. Choose one **Workspace** at a time. Document and queue panels then repeat into one chart per document level or queue task type, respectively; their legends show only the deletion/state dimension. **Exporter health** confirms current database access; queue and embedding series show workflow backlog/state, not individual customer or agent activity."
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      }
     },
     {
       "id": 2,
       "title": "Exporter / database health",
       "description": "1 means the latest aggregate-only PostgreSQL snapshot succeeded; 0 means it failed. This is access/collection health, not the state of a specific queue task.",
       "type": "timeseries",
-      "fieldConfig": {"defaults": {"min": 0, "max": 1}, "overrides": []},
-      "targets": [{"expr": "honcho_exporter_up{job=\"honcho\"}", "legendFormat": "{{workspace}}"}],
-      "gridPos": {"h": 8, "w": 8, "x": 0, "y": 5}
+      "fieldConfig": {
+        "defaults": {
+          "min": 0,
+          "max": 1
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "honcho_exporter_up{job=\"honcho\"}",
+          "legendFormat": "{{workspace}}"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 0,
+        "y": 5
+      }
     },
     {
       "id": 3,
       "title": "Scrape duration",
       "description": "Wall-clock duration of the latest exporter aggregate snapshot. Sustained increases can indicate database load or an inefficient query plan.",
       "type": "timeseries",
-      "fieldConfig": {"defaults": {"unit": "s", "min": 0}, "overrides": []},
-      "targets": [{"expr": "honcho_exporter_scrape_duration_seconds{job=\"honcho\"}", "legendFormat": "snapshot"}],
-      "gridPos": {"h": 8, "w": 8, "x": 8, "y": 5}
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "honcho_exporter_scrape_duration_seconds{job=\"honcho\"}",
+          "legendFormat": "snapshot"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 8,
+        "y": 5
+      }
     },
     {
       "id": 4,
       "title": "Sessions and peers",
       "description": "Current aggregate peer count and active/inactive session counts. These are counts only; no names or identifiers are exported.",
       "type": "timeseries",
-      "fieldConfig": {"defaults": {"min": 0}, "overrides": []},
+      "fieldConfig": {
+        "defaults": {
+          "min": 0
+        },
+        "overrides": []
+      },
       "targets": [
-        {"expr": "honcho_workspace_peers{job=\"honcho\", workspace=~\"$workspace\"}", "legendFormat": "{{workspace}} peers"},
-        {"expr": "honcho_workspace_sessions{job=\"honcho\", workspace=~\"$workspace\"}", "legendFormat": "{{workspace}} {{state}} sessions"}
+        {
+          "expr": "honcho_workspace_peers{job=\"honcho\", workspace=~\"$workspace\"}",
+          "legendFormat": "{{workspace}} peers"
+        },
+        {
+          "expr": "honcho_workspace_sessions{job=\"honcho\", workspace=~\"$workspace\"}",
+          "legendFormat": "{{workspace}} {{state}} sessions"
+        }
       ],
-      "gridPos": {"h": 8, "w": 8, "x": 16, "y": 5}
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 5
+      }
     },
     {
       "id": 5,
       "title": "Messages and tokens",
       "description": "Stored aggregate message count and aggregate token count. These are retained database totals rather than the current context window or traffic rate.",
       "type": "timeseries",
-      "fieldConfig": {"defaults": {"min": 0}, "overrides": []},
+      "fieldConfig": {
+        "defaults": {
+          "min": 0
+        },
+        "overrides": []
+      },
       "targets": [
-        {"expr": "honcho_workspace_messages{job=\"honcho\", workspace=~\"$workspace\"}", "legendFormat": "{{workspace}} messages"},
-        {"expr": "honcho_workspace_message_tokens{job=\"honcho\", workspace=~\"$workspace\"}", "legendFormat": "{{workspace}} tokens"}
+        {
+          "expr": "honcho_workspace_messages{job=\"honcho\", workspace=~\"$workspace\"}",
+          "legendFormat": "{{workspace}} messages"
+        },
+        {
+          "expr": "honcho_workspace_message_tokens{job=\"honcho\", workspace=~\"$workspace\"}",
+          "legendFormat": "{{workspace}} tokens"
+        }
       ],
-      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 13}
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 13
+      }
     },
     {
       "id": 6,
-      "title": "Documents by level and deletion state",
-      "description": "Aggregate documents grouped only by fixed document level and deletion state. It does not export document contents, source IDs, or peer identities.",
+      "title": "$workspace $document_level documents by deletion state",
+      "description": "One chart per selected workspace and document level. The two series are stored documents with deleted=false and deleted=true. It does not export document contents, source IDs, or peer identities.",
       "type": "timeseries",
-      "fieldConfig": {"defaults": {"min": 0}, "overrides": []},
-      "targets": [{"expr": "honcho_workspace_documents{job=\"honcho\", workspace=~\"$workspace\"}", "legendFormat": "{{workspace}} {{level}} deleted={{deleted}}"}],
-      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 13}
+      "fieldConfig": {
+        "defaults": {
+          "min": 0
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "honcho_workspace_documents{job=\"honcho\", workspace=\"$workspace\", level=\"$document_level\"}",
+          "legendFormat": "deleted={{deleted}}"
+        }
+      ],
+      "repeat": "document_level",
+      "repeatDirection": "h",
+      "maxPerRow": 2,
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 13
+      }
     },
     {
       "id": 7,
       "title": "Embedding synchronization state",
       "description": "Aggregate document and message embedding rows grouped by bounded sync state. A persistent pending or failed population indicates reconciliation work to investigate.",
       "type": "timeseries",
-      "fieldConfig": {"defaults": {"min": 0}, "overrides": []},
+      "fieldConfig": {
+        "defaults": {
+          "min": 0
+        },
+        "overrides": []
+      },
       "targets": [
-        {"expr": "honcho_workspace_document_embeddings{job=\"honcho\", workspace=~\"$workspace\"}", "legendFormat": "{{workspace}} document {{sync_state}}"},
-        {"expr": "honcho_workspace_message_embeddings{job=\"honcho\", workspace=~\"$workspace\"}", "legendFormat": "{{workspace}} message {{sync_state}}"}
+        {
+          "expr": "honcho_workspace_document_embeddings{job=\"honcho\", workspace=~\"$workspace\"}",
+          "legendFormat": "{{workspace}} document {{sync_state}}"
+        },
+        {
+          "expr": "honcho_workspace_message_embeddings{job=\"honcho\", workspace=~\"$workspace\"}",
+          "legendFormat": "{{workspace}} message {{sync_state}}"
+        }
       ],
-      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 21}
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 21
+      }
     },
     {
       "id": 8,
-      "title": "Queue items by type and state",
-      "description": "Aggregate queue work grouped by bounded task type and state. In-progress is derived from the active queue-session table; pending age is shown separately.",
+      "title": "$workspace $queue_task_type queue items by state",
+      "description": "One chart per selected workspace and queue task type. The series are pending, in_progress, and completed counts. In-progress is derived from the active queue-session table; pending age is shown separately.",
       "type": "timeseries",
-      "fieldConfig": {"defaults": {"min": 0}, "overrides": []},
-      "targets": [{"expr": "honcho_workspace_queue_items{job=\"honcho\", workspace=~\"$workspace\"}", "legendFormat": "{{workspace}} {{task_type}} {{state}}"}],
-      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 21}
+      "fieldConfig": {
+        "defaults": {
+          "min": 0
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "honcho_workspace_queue_items{job=\"honcho\", workspace=\"$workspace\", task_type=\"$queue_task_type\"}",
+          "legendFormat": "{{state}}"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 21
+      },
+      "repeat": "queue_task_type",
+      "repeatDirection": "h",
+      "maxPerRow": 2
     },
     {
       "id": 9,
       "title": "Oldest pending work age",
       "description": "Age of the oldest queue item that is pending (unprocessed and not active), grouped by bounded task type. A high value is backlog age, not runtime duration of an active task.",
       "type": "timeseries",
-      "fieldConfig": {"defaults": {"unit": "s", "min": 0}, "overrides": []},
-      "targets": [{"expr": "honcho_workspace_oldest_pending_age_seconds{job=\"honcho\", workspace=~\"$workspace\"}", "legendFormat": "{{workspace}} {{task_type}}"}],
-      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 29}
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "honcho_workspace_oldest_pending_age_seconds{job=\"honcho\", workspace=~\"$workspace\"}",
+          "legendFormat": "{{workspace}} {{task_type}}"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 29
+      }
     },
     {
       "id": 10,
       "title": "Active queue sessions",
       "description": "Distinct active queue work-unit count. It should be interpreted with queue state counts; it does not expose any work-unit identifiers.",
       "type": "timeseries",
-      "fieldConfig": {"defaults": {"min": 0}, "overrides": []},
-      "targets": [{"expr": "honcho_workspace_active_queue_sessions{job=\"honcho\", workspace=~\"$workspace\"}", "legendFormat": "{{workspace}}"}],
-      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 29}
+      "fieldConfig": {
+        "defaults": {
+          "min": 0
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "honcho_workspace_active_queue_sessions{job=\"honcho\", workspace=~\"$workspace\"}",
+          "legendFormat": "{{workspace}}"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 29
+      }
     },
     {
       "id": 11,
       "title": "Native deriver queue throughput",
-      "description": "Rate of queue items completed by the native Honcho deriver process. This is a throughput counter from the loopback-only native metrics endpoint, distinct from the exporter’s point-in-time queue inventory.",
+      "description": "Rate of queue items completed by the native Honcho deriver process. This is a throughput counter from the loopback-only native metrics endpoint, distinct from the exporter\u2019s point-in-time queue inventory.",
       "type": "timeseries",
-      "fieldConfig": {"defaults": {"unit": "ops", "min": 0}, "overrides": []},
-      "targets": [{"expr": "rate(deriver_queue_items_processed_total{job=\"honcho_deriver\"}[5m])", "legendFormat": "queue items/s"}],
-      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 37}
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "rate(deriver_queue_items_processed_total{job=\"honcho_deriver\"}[5m])",
+          "legendFormat": "queue items/s"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 37
+      }
     },
     {
       "id": 12,
       "title": "Native deriver generated-token throughput",
       "description": "Generated output tokens per second, grouped by deriver task type. This uses only component=output_total and token_type=output. Unlike the input accounting components, these series can be read as output-token throughput and are not an overlapping breakdown.",
       "type": "timeseries",
-      "fieldConfig": {"defaults": {"unit": "ops", "min": 0, "decimals": 2}, "overrides": []},
-      "targets": [{"expr": "sum by (task_type) (rate(deriver_tokens_processed_total{job=\"honcho_deriver\", token_type=\"output\", component=\"output_total\"}[5m]))", "legendFormat": "{{task_type}} output tokens/s"}],
-      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 37}
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops",
+          "min": 0,
+          "decimals": 2
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "sum by (task_type) (rate(deriver_tokens_processed_total{job=\"honcho_deriver\", token_type=\"output\", component=\"output_total\"}[5m]))",
+          "legendFormat": "{{task_type}} output tokens/s"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 37
+      }
     },
     {
       "id": 13,
       "title": "Native deriver input-token accounting components (not additive)",
       "description": "Input-token rates as reported by the native deriver. prompt, messages, and previous_summary are overlapping accounting components for the same work, so do NOT sum them into a total. This panel exposes the breakdown rather than hiding it.",
       "type": "timeseries",
-      "fieldConfig": {"defaults": {"unit": "ops", "min": 0, "decimals": 2}, "overrides": []},
-      "targets": [{"expr": "rate(deriver_tokens_processed_total{job=\"honcho_deriver\", token_type=\"input\"}[5m])", "legendFormat": "{{task_type}} input / {{component}} tokens/s"}],
-      "gridPos": {"h": 8, "w": 24, "x": 0, "y": 45}
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops",
+          "min": 0,
+          "decimals": 2
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "rate(deriver_tokens_processed_total{job=\"honcho_deriver\", token_type=\"input\"}[5m])",
+          "legendFormat": "{{task_type}} input / {{component}} tokens/s"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 45
+      }
     }
   ],
   "schemaVersion": 41,
-  "tags": ["honcho", "postgresql", "operational"],
-  "templating": {"list": [{"name": "workspace", "label": "Workspace", "type": "query", "datasource": {"type": "prometheus", "uid": "prometheus"}, "definition": "label_values(honcho_workspace_peers{job=\"honcho\"}, workspace)", "query": {"query": "label_values(honcho_workspace_peers{job=\"honcho\"}, workspace)", "refId": "PrometheusVariableQueryEditor-VariableQuery"}, "refresh": 1, "sort": 1, "multi": true, "includeAll": true, "allValue": ".*", "current": {"text": "All", "value": "$__all"}, "hide": 0, "options": []}]},
-  "time": {"from": "now-6h", "to": "now"},
+  "tags": [
+    "honcho",
+    "postgresql",
+    "operational"
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "workspace",
+        "label": "Workspace",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "definition": "label_values(honcho_workspace_peers{job=\"honcho\"}, workspace)",
+        "query": {
+          "query": "label_values(honcho_workspace_peers{job=\"honcho\"}, workspace)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "sort": 1,
+        "multi": false,
+        "includeAll": false,
+        "current": {
+          "text": "hermes",
+          "value": "hermes"
+        },
+        "hide": 0,
+        "options": []
+      },
+      {
+        "name": "document_level",
+        "label": "Document level",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "definition": "label_values(honcho_workspace_documents{job=\"honcho\", workspace=~\"$workspace\"}, document_level)",
+        "query": {
+          "query": "label_values(honcho_workspace_documents{job=\"honcho\", workspace=~\"$workspace\"}, document_level)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "sort": 1,
+        "multi": true,
+        "includeAll": true,
+        "allValue": ".*",
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
+        "hide": 2,
+        "options": []
+      },
+      {
+        "name": "queue_task_type",
+        "label": "Queue task type",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "definition": "label_values(honcho_workspace_queue_items{job=\"honcho\", workspace=~\"$workspace\"}, queue_task_type)",
+        "query": {
+          "query": "label_values(honcho_workspace_queue_items{job=\"honcho\", workspace=~\"$workspace\"}, queue_task_type)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "sort": 1,
+        "multi": true,
+        "includeAll": true,
+        "allValue": ".*",
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
+        "hide": 2,
+        "options": []
+      }
+    ]
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
   "timezone": "browser",
   "title": "Honcho Overview",
   "uid": "honcho-overview",
