@@ -14,6 +14,13 @@ scrape_configs:
         labels:
           host: AIMachine002
 
+  - job_name: honcho_deriver
+    metrics_path: /metrics
+    static_configs:
+      - targets: [127.0.0.1:9091]
+        labels:
+          host: AIMachine002
+
   - job_name: hermes_lcm
     metrics_path: /metrics
     static_configs:

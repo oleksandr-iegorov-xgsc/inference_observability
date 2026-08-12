@@ -99,6 +99,28 @@
       "fieldConfig": {"defaults": {"min": 0}, "overrides": []},
       "targets": [{"expr": "honcho_workspace_active_queue_sessions{job=\"honcho\", workspace=~\"$workspace\"}", "legendFormat": "{{workspace}}"}],
       "gridPos": {"h": 8, "w": 12, "x": 12, "y": 29}
+    },
+    {
+      "id": 11,
+      "title": "Native deriver queue throughput",
+      "description": "Rate of queue items completed by the native Honcho deriver process. This is a throughput counter from the loopback-only native metrics endpoint, distinct from the exporter’s point-in-time queue inventory.",
+      "type": "timeseries",
+      "fieldConfig": {"defaults": {"unit": "ops", "min": 0}, "overrides": []},
+      "targets": [{"expr": "rate(deriver_queue_items_processed_total{job=\"honcho_deriver\"}[5m])", "legendFormat": "queue items/s"}],
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 37}
+    },
+    {
+      "id": 12,
+      "title": "Native deriver token throughput",
+      "description": "Rate of tokens processed by the native Honcho deriver process. This is process throughput and is not a count of stored Honcho message tokens.",
+      "type": "timeseries",
+      "fieldConfig": {"defaults": {"unit": "ops", "min": 0}, "overrides": []},
+      "targets": [
+        {"expr": "rate(deriver_tokens_processed_total{job=\"honcho_deriver\"}[5m])", "legendFormat": "deriver tokens/s"},
+        {"expr": "rate(dialectic_tokens_processed_total{job=\"honcho_deriver\"}[5m])", "legendFormat": "dialectic tokens/s"},
+        {"expr": "rate(dreamer_tokens_processed_total{job=\"honcho_deriver\"}[5m])", "legendFormat": "dreamer tokens/s"}
+      ],
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 37}
     }
   ],
   "schemaVersion": 41,
