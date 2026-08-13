@@ -145,7 +145,7 @@
       "transparent": true,
       "options": {
         "mode": "markdown",
-        "content": "## Raw MCP endpoint calls\nMetrics from the raw MCP worker (`honcho_mcp_tool_*`). These represent endpoint traffic separately from the native Hermes plugin."
+        "content": "## Raw MCP endpoint calls\nMetrics from the raw MCP worker (`honcho_mcp_tool_*`). These represent endpoint traffic separately from the native Hermes plugin. Cumulative panels and mean duration show the first scraped call immediately; process counters reset when the MCP worker restarts."
       },
       "gridPos": {
         "h": 2,
@@ -157,8 +157,8 @@
     {
       "id": 8,
       "type": "timeseries",
-      "title": "Raw MCP calls by outcome",
-      "description": "Per-second raw MCP endpoint-call rate by bounded tool name and outcome.",
+      "title": "Raw MCP calls by outcome (cumulative)",
+      "description": "Cumulative raw MCP endpoint calls since the currently running MCP worker started. This displays the first scraped call immediately; counters reset when that worker restarts.",
       "fieldConfig": {
         "defaults": {
           "unit": "ops",
@@ -168,7 +168,7 @@
       },
       "targets": [
         {
-          "expr": "sum by (tool_name, outcome) (rate(honcho_mcp_tool_calls_total{job=\"honcho_mcp\", tool_name=~\"$mcp_tool\"}[5m]))",
+          "expr": "sum by (tool_name, outcome) (honcho_mcp_tool_calls_total{job=\"honcho_mcp\", tool_name=~\"$mcp_tool\"})",
           "legendFormat": "{{tool_name}} / {{outcome}}"
         }
       ],
@@ -182,8 +182,8 @@
     {
       "id": 9,
       "type": "timeseries",
-      "title": "Raw MCP call duration",
-      "description": "p50 and p95 raw MCP endpoint-call duration, calculated from the MCP duration histogram.",
+      "title": "Raw MCP mean call duration",
+      "description": "Mean raw MCP endpoint-call duration since the currently running MCP worker started. It displays after the first call; percentile estimates require multiple calls and are not used here.",
       "fieldConfig": {
         "defaults": {
           "unit": "s",
@@ -194,12 +194,8 @@
       },
       "targets": [
         {
-          "expr": "histogram_quantile(0.50, sum by (le, tool_name) (rate(honcho_mcp_tool_duration_seconds_bucket{job=\"honcho_mcp\", tool_name=~\"$mcp_tool\"}[5m])))",
-          "legendFormat": "{{tool_name}} p50"
-        },
-        {
-          "expr": "histogram_quantile(0.95, sum by (le, tool_name) (rate(honcho_mcp_tool_duration_seconds_bucket{job=\"honcho_mcp\", tool_name=~\"$mcp_tool\"}[5m])))",
-          "legendFormat": "{{tool_name}} p95"
+          "expr": "sum by (tool_name) (honcho_mcp_tool_duration_seconds_sum{job=\"honcho_mcp\", tool_name=~\"$mcp_tool\"}) / sum by (tool_name) (honcho_mcp_tool_duration_seconds_count{job=\"honcho_mcp\", tool_name=~\"$mcp_tool\"})",
+          "legendFormat": "{{tool_name}} mean"
         }
       ],
       "gridPos": {
@@ -212,18 +208,18 @@
     {
       "id": 10,
       "type": "timeseries",
-      "title": "Raw MCP serialized payload throughput",
-      "description": "Serialized MCP request/response payload bytes per second, grouped by endpoint tool and direction.",
+      "title": "Raw MCP serialized payload volume (cumulative)",
+      "description": "Cumulative serialized MCP request/response payload bytes since the currently running MCP worker started, grouped by endpoint tool and direction.",
       "fieldConfig": {
         "defaults": {
-          "unit": "Bps",
+          "unit": "bytes",
           "min": 0
         },
         "overrides": []
       },
       "targets": [
         {
-          "expr": "sum by (tool_name, direction) (rate(honcho_mcp_payload_bytes_total{job=\"honcho_mcp\", tool_name=~\"$mcp_tool\"}[5m]))",
+          "expr": "sum by (tool_name, direction) (honcho_mcp_payload_bytes_total{job=\"honcho_mcp\", tool_name=~\"$mcp_tool\"})",
           "legendFormat": "{{tool_name}} / {{direction}}"
         }
       ],
@@ -237,8 +233,8 @@
     {
       "id": 11,
       "type": "timeseries",
-      "title": "Raw MCP estimated serialized payload-token throughput",
-      "description": "Estimated serialized MCP request/response payload tokens per second. Not model-provider billing and not downstream Honcho LLM token consumption.",
+      "title": "Raw MCP estimated serialized payload tokens (cumulative)",
+      "description": "Cumulative estimated serialized MCP request/response payload tokens since the currently running MCP worker started. Not model-provider billing and not downstream Honcho LLM token consumption.",
       "fieldConfig": {
         "defaults": {
           "unit": "ops",
@@ -248,7 +244,7 @@
       },
       "targets": [
         {
-          "expr": "sum by (tool_name, direction, tokenizer) (rate(honcho_mcp_tool_payload_tokens_estimated_total{job=\"honcho_mcp\", tool_name=~\"$mcp_tool\", tokenizer=~\"$mcp_tokenizer\"}[5m]))",
+          "expr": "sum by (tool_name, direction, tokenizer) (honcho_mcp_tool_payload_tokens_estimated_total{job=\"honcho_mcp\", tool_name=~\"$mcp_tool\", tokenizer=~\"$mcp_tokenizer\"})",
           "legendFormat": "{{tool_name}} / {{direction}} / {{tokenizer}}"
         }
       ],
