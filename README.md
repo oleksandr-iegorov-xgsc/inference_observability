@@ -96,7 +96,9 @@ uses bounded labels:
 
 - `hermes_tool_calls_total{profile,tool_name,outcome}`
 - `hermes_tool_duration_seconds` **histogram** `{profile,tool_name}` (the
-  dashboard calculates p50 and p95 from its `_bucket` series)
+  dashboard currently shows a start-to-present mean from its `_sum`/`_count`
+  series so a first call is visible immediately; `_bucket` series remain
+  available for future p50/p95 rate panels once sufficient traffic exists)
 - `hermes_tool_payload_bytes_total{profile,tool_name,direction}`
 - `hermes_tool_payload_tokens_estimated_total{profile,tool_name,direction,tokenizer}`
 
@@ -138,5 +140,6 @@ curl -fsSG http://127.0.0.1:9090/api/v1/query \
 
 Finally, wait for Grafana's provisioner (up to 30 seconds) and verify the
 **Inference / Hermes Tool Usage** dashboard renders its profile/tool variables,
-calls/outcomes, histogram p50/p95, payload bytes, and estimated serialized
+calls/outcomes, mean duration (with histogram buckets retained for later
+percentile panels), payload bytes, and estimated serialized
 payload-token panels against the live metric names.
