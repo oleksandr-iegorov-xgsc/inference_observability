@@ -93,7 +93,7 @@
       "title": "Raw MCP serialized payload throughput",
       "description": "Serialized MCP request/response payload bytes per second, grouped by endpoint tool and direction.",
       "fieldConfig": {"defaults": {"unit": "Bps", "min": 0}, "overrides": []},
-      "targets": [{"expr": "sum by (tool_name, direction) (rate(honcho_mcp_tool_payload_bytes_total{job=\"honcho_mcp\", tool_name=~\"$mcp_tool\"}[5m]))", "legendFormat": "{{tool_name}} / {{direction}}"}],
+      "targets": [{"expr": "sum by (tool_name, direction) (rate(honcho_mcp_payload_bytes_total{job=\"honcho_mcp\", tool_name=~\"$mcp_tool\"}[5m]))", "legendFormat": "{{tool_name}} / {{direction}}"}],
       "gridPos": {"h": 8, "w": 12, "x": 0, "y": 33}
     },
     {
