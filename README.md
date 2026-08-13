@@ -80,3 +80,63 @@ integration assumptions before the dashboard is considered live.
 The dashboard's **estimated payload tokens** are an estimate of serialized
 MCP/tool request and response payload size. They are **not** model-provider
 billing tokens and are **not** downstream Honcho LLM token consumption.
+
+## Proposed shared Hermes tool collector
+
+The provisioned **Hermes Tool Usage** dashboard is in Grafana's **Inference**
+folder and is reserved for a proposed shared collector. Prometheus is configured
+to scrape the collector as job `hermes_tools` at
+`127.0.0.1:9470/metrics`. Because Prometheus uses `network_mode: host`, this
+loopback address resolves to the host listener. Do not expose the listener on a
+non-loopback interface merely for scraping; if the collector is moved into a
+non-host-network container, use its deliberate reachable address instead.
+
+The collector/dashboard metric contract is intentionally aggregate-only and
+uses bounded labels:
+
+- `hermes_tool_calls_total{profile,tool_name,outcome}`
+- `hermes_tool_duration_seconds` **histogram** `{profile,tool_name}` (the
+  dashboard calculates p50 and p95 from its `_bucket` series)
+- `hermes_tool_payload_bytes_total{profile,tool_name,direction}`
+- `hermes_tool_payload_tokens_estimated_total{profile,tool_name,direction,tokenizer}`
+
+`profile`, `tool_name`, `outcome`, `direction`, and `tokenizer` must have finite
+allow-lists (or collapse unknown values to a bounded fallback). Never emit tool
+arguments, results, prompts, request/session/task identifiers, filesystem paths,
+error text, or credentials as labels or metric values. The dashboard's
+multi-select **Hermes profile** and **Tool** filters include an **All** option.
+
+Estimated serialized payload tokens are size estimates (for example,
+`bytes_div_4`) for tool request/response serialization. They are not
+model-provider billing tokens and not downstream LLM token consumption.
+
+### Intended deployment validation (not performed by this change)
+
+After the shared collector is deployed and emitting a representative tool call,
+reload or recreate only Prometheus so it reads the static scrape configuration;
+do not restart model servers. Then validate:
+
+```bash
+# Collector listener and safe aggregate exposition (after deploying the collector)
+curl -fsS http://127.0.0.1:9470/metrics
+
+# Prometheus configuration and target health (after Prometheus reload/recreate)
+./scripts/validate.sh
+curl -fsS http://127.0.0.1:9090/api/v1/targets \
+  | jq -e '.data.activeTargets[] | select(.labels.job == "hermes_tools") | select(.health == "up")'
+
+# Confirm a representative call produced all expected metric families, including buckets.
+curl -fsSG http://127.0.0.1:9090/api/v1/query \
+  --data-urlencode 'query=hermes_tool_calls_total{job="hermes_tools"}'
+curl -fsSG http://127.0.0.1:9090/api/v1/query \
+  --data-urlencode 'query=hermes_tool_duration_seconds_bucket{job="hermes_tools"}'
+curl -fsSG http://127.0.0.1:9090/api/v1/query \
+  --data-urlencode 'query=hermes_tool_payload_bytes_total{job="hermes_tools"}'
+curl -fsSG http://127.0.0.1:9090/api/v1/query \
+  --data-urlencode 'query=hermes_tool_payload_tokens_estimated_total{job="hermes_tools"}'
+```
+
+Finally, wait for Grafana's provisioner (up to 30 seconds) and verify the
+**Inference / Hermes Tool Usage** dashboard renders its profile/tool variables,
+calls/outcomes, histogram p50/p95, payload bytes, and estimated serialized
+payload-token panels against the live metric names.

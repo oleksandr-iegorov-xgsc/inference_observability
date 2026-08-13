@@ -46,6 +46,15 @@ scrape_configs:
         labels:
           host: AIMachine002
 
+  # Proposed shared collector for bounded aggregate Hermes tool telemetry.
+  # Prometheus uses host networking, so this loopback target is the host listener.
+  - job_name: hermes_tools
+    metrics_path: /metrics
+    static_configs:
+      - targets: [127.0.0.1:9470]
+        labels:
+          host: AIMachine002
+
   - job_name: vllm
     metrics_path: /metrics
     file_sd_configs:
