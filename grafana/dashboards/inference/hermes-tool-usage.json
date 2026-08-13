@@ -1,5 +1,7 @@
 {
-  "annotations": {"list": []},
+  "annotations": {
+    "list": []
+  },
   "description": "Aggregate telemetry for the proposed shared Hermes tool collector. It contains no tool arguments, results, prompts, identifiers, paths, error text, or credentials. Estimated payload tokens measure serialized request and response size only; they are not model-provider billing or downstream LLM tokens.",
   "editable": false,
   "panels": [
@@ -12,86 +14,146 @@
         "mode": "markdown",
         "content": "# Hermes Tool Usage\n\nThis dashboard is for the proposed shared collector scraped as **`hermes_tools`**. It displays bounded aggregate labels only: **profile**, **tool name**, **outcome**, **direction**, and **tokenizer**. Tool arguments, results, prompts, identifiers, filesystem paths, error text, and credentials must never be exported.\n\n> **Estimated serialized payload tokens** approximate the size of tool request and response payloads (for example, `bytes_div_4`). They are **not** model-provider billing tokens and **not** downstream LLM token consumption."
       },
-      "gridPos": {"h": 5, "w": 24, "x": 0, "y": 0}
+      "gridPos": {
+        "h": 5,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      }
     },
     {
       "id": 2,
       "type": "timeseries",
-      "title": "Tool calls by outcome",
-      "description": "Per-second completed tool-call rate over five minutes, grouped by bounded tool name and outcome. Counter resets from collector restarts are handled by rate().",
-      "fieldConfig": {"defaults": {"unit": "ops", "min": 0}, "overrides": []},
+      "title": "Tool calls by outcome (cumulative)",
+      "description": "Cumulative completed calls since the shared collector started. Displays the first call immediately; counters reset when the collector restarts.",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "min": 0
+        },
+        "overrides": []
+      },
       "targets": [
         {
-          "expr": "sum by (tool_name, outcome) (rate(hermes_tool_calls_total{job=\"hermes_tools\", profile=~\"$profile\", tool_name=~\"$tool\"}[5m]))",
+          "expr": "sum by (tool_name, outcome) (hermes_tool_calls_total{job=\"hermes_tools\", profile=~\"$profile\", tool_name=~\"$tool\"})",
           "legendFormat": "{{tool_name}} / {{outcome}}"
         }
       ],
-      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 5}
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 5
+      }
     },
     {
       "id": 3,
       "type": "timeseries",
-      "title": "Tool-call duration (p50 / p95)",
-      "description": "50th- and 95th-percentile duration over five minutes, calculated from the Prometheus histogram buckets. Percentiles are unavailable until histogram observations have been recorded.",
-      "fieldConfig": {"defaults": {"unit": "s", "min": 0, "decimals": 3}, "overrides": []},
+      "title": "Mean tool-call duration",
+      "description": "Mean tool-call duration since the shared collector started. Displays after the first call; percentiles need multiple observations and are not used here.",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "min": 0,
+          "decimals": 3
+        },
+        "overrides": []
+      },
       "targets": [
         {
-          "expr": "histogram_quantile(0.50, sum by (le, tool_name) (rate(hermes_tool_duration_seconds_bucket{job=\"hermes_tools\", profile=~\"$profile\", tool_name=~\"$tool\"}[5m])))",
-          "legendFormat": "{{tool_name}} p50"
-        },
-        {
-          "expr": "histogram_quantile(0.95, sum by (le, tool_name) (rate(hermes_tool_duration_seconds_bucket{job=\"hermes_tools\", profile=~\"$profile\", tool_name=~\"$tool\"}[5m])))",
-          "legendFormat": "{{tool_name}} p95"
+          "expr": "sum by (tool_name) (hermes_tool_duration_seconds_sum{job=\"hermes_tools\", profile=~\"$profile\", tool_name=~\"$tool\"}) / sum by (tool_name) (hermes_tool_duration_seconds_count{job=\"hermes_tools\", profile=~\"$profile\", tool_name=~\"$tool\"})",
+          "legendFormat": "{{tool_name}} mean"
         }
       ],
-      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 5}
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 5
+      }
     },
     {
       "id": 4,
       "type": "timeseries",
-      "title": "Serialized payload throughput",
-      "description": "Serialized request and response payload bytes per second over five minutes. This is aggregate size telemetry only; payload content is never exported.",
-      "fieldConfig": {"defaults": {"unit": "Bps", "min": 0}, "overrides": []},
+      "title": "Serialized payload volume (cumulative)",
+      "description": "Cumulative serialized request/response payload bytes since the shared collector started. Payload content is never exported.",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes",
+          "min": 0
+        },
+        "overrides": []
+      },
       "targets": [
         {
-          "expr": "sum by (tool_name, direction) (rate(hermes_tool_payload_bytes_total{job=\"hermes_tools\", profile=~\"$profile\", tool_name=~\"$tool\"}[5m]))",
+          "expr": "sum by (tool_name, direction) (hermes_tool_payload_bytes_total{job=\"hermes_tools\", profile=~\"$profile\", tool_name=~\"$tool\"})",
           "legendFormat": "{{tool_name}} / {{direction}}"
         }
       ],
-      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 13}
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 13
+      }
     },
     {
       "id": 5,
       "type": "timeseries",
-      "title": "Estimated serialized payload-token throughput",
-      "description": "Estimated serialized request and response payload tokens per second over five minutes. This is a size estimate by tokenizer, not model-provider billing or downstream LLM token consumption.",
-      "fieldConfig": {"defaults": {"unit": "ops", "min": 0}, "overrides": []},
+      "title": "Estimated serialized payload tokens (cumulative)",
+      "description": "Cumulative estimated serialized request/response payload tokens since the shared collector started. A size estimate, not billing or downstream LLM consumption.",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "min": 0
+        },
+        "overrides": []
+      },
       "targets": [
         {
-          "expr": "sum by (tool_name, direction, tokenizer) (rate(hermes_tool_payload_tokens_estimated_total{job=\"hermes_tools\", profile=~\"$profile\", tool_name=~\"$tool\"}[5m]))",
+          "expr": "sum by (tool_name, direction, tokenizer) (hermes_tool_payload_tokens_estimated_total{job=\"hermes_tools\", profile=~\"$profile\", tool_name=~\"$tool\"})",
           "legendFormat": "{{tool_name}} / {{direction}} / {{tokenizer}}"
         }
       ],
-      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 13}
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 13
+      }
     }
   ],
   "schemaVersion": 41,
-  "tags": ["inference", "hermes", "tools", "tool-usage"],
+  "tags": [
+    "inference",
+    "hermes",
+    "tools",
+    "tool-usage"
+  ],
   "templating": {
     "list": [
       {
         "name": "profile",
         "label": "Hermes profile",
         "type": "query",
-        "datasource": {"type": "prometheus", "uid": "prometheus"},
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
         "definition": "label_values(hermes_tool_calls_total{job=\"hermes_tools\"}, profile)",
-        "query": {"query": "label_values(hermes_tool_calls_total{job=\"hermes_tools\"}, profile)", "refId": "Profile"},
+        "query": {
+          "query": "label_values(hermes_tool_calls_total{job=\"hermes_tools\"}, profile)",
+          "refId": "Profile"
+        },
         "refresh": 1,
         "sort": 1,
         "multi": true,
         "includeAll": true,
         "allValue": ".*",
-        "current": {"text": "All", "value": "$__all"},
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
         "hide": 0,
         "options": []
       },
@@ -99,21 +161,33 @@
         "name": "tool",
         "label": "Tool",
         "type": "query",
-        "datasource": {"type": "prometheus", "uid": "prometheus"},
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
         "definition": "label_values(hermes_tool_calls_total{job=\"hermes_tools\", profile=~\"$profile\"}, tool_name)",
-        "query": {"query": "label_values(hermes_tool_calls_total{job=\"hermes_tools\", profile=~\"$profile\"}, tool_name)", "refId": "Tool"},
+        "query": {
+          "query": "label_values(hermes_tool_calls_total{job=\"hermes_tools\", profile=~\"$profile\"}, tool_name)",
+          "refId": "Tool"
+        },
         "refresh": 1,
         "sort": 1,
         "multi": true,
         "includeAll": true,
         "allValue": ".*",
-        "current": {"text": "All", "value": "$__all"},
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
         "hide": 0,
         "options": []
       }
     ]
   },
-  "time": {"from": "now-6h", "to": "now"},
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
   "timezone": "browser",
   "title": "Hermes Tool Usage",
   "uid": "hermes-tool-usage",
