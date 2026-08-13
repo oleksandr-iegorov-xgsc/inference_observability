@@ -59,7 +59,7 @@ Prometheus has two independently scraped, host-network loopback jobs and the
 provisioned **Honcho Tool Usage** dashboard separates them explicitly:
 
 - `hermes_honcho_tools` scrapes the native Hermes plugin exporter at
-  `127.0.0.1:9480/metrics`. Its expected metrics are
+  `127.0.0.1:9469/metrics`. Its expected metrics are
   `hermes_honcho_tool_calls_total{profile,tool_name,outcome}`,
   `hermes_honcho_tool_duration_seconds` (histogram),
   `hermes_honcho_tool_payload_bytes_total{profile,tool_name,direction}`, and
