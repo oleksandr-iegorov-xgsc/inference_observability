@@ -315,7 +315,7 @@
     {
       "id": 60,
       "title": "$workspace explicit documents by deletion state",
-      "description": "Document count at the explicit level. Each selected workspace remains its own series; deleted=false and deleted=true are never combined.",
+      "description": "Direct facts stated in the source conversation, stored without interpretation. Series split them into retained (deleted=false) and marked-deleted (deleted=true) documents.",
       "type": "timeseries",
       "fieldConfig": {
         "defaults": {
@@ -339,7 +339,7 @@
     {
       "id": 61,
       "title": "$workspace deductive documents by deletion state",
-      "description": "Document count at the deductive level. Each selected workspace remains its own series; deleted=false and deleted=true are never combined.",
+      "description": "Conclusions that follow from one or more stored premises. Series split them into retained (deleted=false) and marked-deleted (deleted=true) documents.",
       "type": "timeseries",
       "fieldConfig": {
         "defaults": {
@@ -363,7 +363,7 @@
     {
       "id": 62,
       "title": "$workspace inductive documents by deletion state",
-      "description": "Document count at the inductive level. Each selected workspace remains its own series; deleted=false and deleted=true are never combined.",
+      "description": "Patterns or generalizations inferred from multiple observations; they include a confidence level. Series split them into retained (deleted=false) and marked-deleted (deleted=true) documents.",
       "type": "timeseries",
       "fieldConfig": {
         "defaults": {
@@ -387,7 +387,7 @@
     {
       "id": 63,
       "title": "$workspace contradiction documents by deletion state",
-      "description": "Document count at the contradiction level. Each selected workspace remains its own series; deleted=false and deleted=true are never combined.",
+      "description": "Records of source observations that conflict with each other; they flag inconsistency rather than choose a winner. Series split them into retained (deleted=false) and marked-deleted (deleted=true) documents.",
       "type": "timeseries",
       "fieldConfig": {
         "defaults": {
@@ -427,7 +427,7 @@
     {
       "id": 70,
       "title": "$workspace webhook queue items by state",
-      "description": "Queue item count for the webhook workflow. Each selected workspace remains its own series; pending, in_progress, and completed are separate states.",
+      "description": "Outbound webhook delivery work after a Honcho event. Series show how many deliveries are pending, in progress, or completed.",
       "type": "timeseries",
       "fieldConfig": {
         "defaults": {
@@ -451,7 +451,7 @@
     {
       "id": 71,
       "title": "$workspace summary queue items by state",
-      "description": "Queue item count for the summary workflow. Each selected workspace remains its own series; pending, in_progress, and completed are separate states.",
+      "description": "Session-summary maintenance work triggered as conversation messages accumulate. Series show how many jobs are pending, in progress, or completed.",
       "type": "timeseries",
       "fieldConfig": {
         "defaults": {
@@ -475,7 +475,7 @@
     {
       "id": 72,
       "title": "$workspace representation queue items by state",
-      "description": "Queue item count for the representation workflow. Each selected workspace remains its own series; pending, in_progress, and completed are separate states.",
+      "description": "Extraction work that turns conversation content into structured observations. Series show how many jobs are pending, in progress, or completed.",
       "type": "timeseries",
       "fieldConfig": {
         "defaults": {
@@ -499,7 +499,7 @@
     {
       "id": 73,
       "title": "$workspace dream queue items by state",
-      "description": "Queue item count for the dream workflow. Each selected workspace remains its own series; pending, in_progress, and completed are separate states.",
+      "description": "Background reflection work that derives higher-level memory, such as deductions, patterns, contradictions, or card refreshes. Series show how many jobs are pending, in progress, or completed.",
       "type": "timeseries",
       "fieldConfig": {
         "defaults": {
@@ -523,7 +523,7 @@
     {
       "id": 74,
       "title": "$workspace deletion queue items by state",
-      "description": "Queue item count for the deletion workflow. Each selected workspace remains its own series; pending, in_progress, and completed are separate states.",
+      "description": "Cleanup work that removes a session, observation, or workspace as requested. Series show how many jobs are pending, in progress, or completed.",
       "type": "timeseries",
       "fieldConfig": {
         "defaults": {
@@ -547,7 +547,7 @@
     {
       "id": 75,
       "title": "$workspace reconciler queue items by state",
-      "description": "Queue item count for the reconciler workflow. Each selected workspace remains its own series; pending, in_progress, and completed are separate states.",
+      "description": "Periodic self-healing work, including vector synchronization and queue cleanup. Series show how many jobs are pending, in progress, or completed.",
       "type": "timeseries",
       "fieldConfig": {
         "defaults": {
