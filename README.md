@@ -52,3 +52,31 @@ Run the same exporter stack on the new server, give its Prometheus targets a uni
 ## Attribution boundary
 
 This deployment measures model, vLLM instance, host, and GPU behavior. It does not provide per-agent measurements because agents call vLLM directly. An authenticated proxy is the future extension point for metrics labelled with `agent_id`.
+
+## Honcho tool-use telemetry
+
+Prometheus has two independently scraped, host-network loopback jobs and the
+provisioned **Honcho Tool Usage** dashboard separates them explicitly:
+
+- `hermes_honcho_tools` scrapes the native Hermes plugin exporter at
+  `127.0.0.1:9480/metrics`. Its expected metrics are
+  `hermes_honcho_tool_calls_total{profile,tool_name,outcome}`,
+  `hermes_honcho_tool_duration_seconds` (histogram),
+  `hermes_honcho_tool_payload_bytes_total{profile,tool_name,direction}`, and
+  `hermes_honcho_tool_payload_tokens_estimated_total{profile,tool_name,direction,tokenizer}`.
+- `honcho_mcp` scrapes the raw MCP worker at `127.0.0.1:8787/metrics`. Its
+  expected analogous metric family is `honcho_mcp_tool_*`, with bounded
+  `tool_name`, `outcome`, `direction`, and `tokenizer` labels. A `workspace`
+  label must not be added unless its value set is demonstrably bounded.
+
+Because the Prometheus container uses `network_mode: host`, both `127.0.0.1`
+targets refer to the host, not an isolated container namespace. If either
+producer instead runs in a non-host-network container, replace its target with
+the existing deployment's reachable gateway/container address and validate it
+from the Prometheus container. The live plugin/worker must also reconcile the
+metric names, histogram suffixes, labels, and exact metrics path with these
+integration assumptions before the dashboard is considered live.
+
+The dashboard's **estimated payload tokens** are an estimate of serialized
+MCP/tool request and response payload size. They are **not** model-provider
+billing tokens and are **not** downstream Honcho LLM token consumption.
