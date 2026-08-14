@@ -39,6 +39,15 @@ scrape_configs:
         labels:
           host: AIMachine002
 
+  # One-shot direct EXG importer. It remains available briefly after a run so
+  # Prometheus scrapes the terminal count-only metrics before intentional exit.
+  - job_name: exg_honcho_importer
+    metrics_path: /metrics
+    static_configs:
+      - targets: [127.0.0.1:9468]
+        labels:
+          host: AIMachine002
+
   - job_name: hermes_lcm
     metrics_path: /metrics
     static_configs:

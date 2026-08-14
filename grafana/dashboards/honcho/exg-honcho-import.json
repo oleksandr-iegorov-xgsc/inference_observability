@@ -1,0 +1,22 @@
+{
+  "annotations": {"list": []},
+  "description": "Count-only observability for bounded EXG direct import jobs. The target is intentionally down between runs; use run state and historical counters rather than target availability alone to assess a completed job.",
+  "editable": false,
+  "panels": [
+    {"id": 1, "type": "text", "title": "How to read this dashboard", "transparent": true, "options": {"mode": "markdown", "content": "# EXG Honcho Import\n\nThis dashboard shows only bounded aggregate metrics from the one-shot direct importer. **No email content, addresses, subjects, message IDs, conversation IDs, workspace names, filesystem paths, tokens, credentials, or error text are exported.**\n\nThe importer target is expected to be down outside a run. A terminal `completed` state and historical counters are the success signals; `up = 0` alone is not a failure."}, "gridPos": {"h": 6, "w": 24, "x": 0, "y": 0}},
+    {"id": 2, "type": "stat", "title": "Current lifecycle state", "targets": [{"expr": "max by (state) (exg_honcho_import_run_state{job=\"exg_honcho_importer\", host=~\"$host\"})", "legendFormat": "{{state}}"}], "options": {"reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "orientation": "auto", "textMode": "value_and_name"}, "gridPos": {"h": 5, "w": 8, "x": 0, "y": 6}},
+    {"id": 3, "type": "stat", "title": "Scrape availability", "description": "Zero is expected after the one-shot container exits.", "targets": [{"expr": "max(up{job=\"exg_honcho_importer\", host=~\"$host\"})", "legendFormat": "up"}], "options": {"reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "orientation": "auto", "textMode": "value_and_name"}, "gridPos": {"h": 5, "w": 8, "x": 8, "y": 6}},
+    {"id": 4, "type": "stat", "title": "Remaining turns", "targets": [{"expr": "sum(exg_honcho_import_pending_turns{job=\"exg_honcho_importer\", host=~\"$host\"})", "legendFormat": "turns"}], "options": {"reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "orientation": "auto", "textMode": "value_and_name"}, "gridPos": {"h": 5, "w": 8, "x": 16, "y": 6}},
+    {"id": 5, "type": "timeseries", "title": "Imported and reconciled turns", "targets": [{"expr": "sum by (outcome) (exg_honcho_import_turns_total{job=\"exg_honcho_importer\", host=~\"$host\"})", "legendFormat": "{{outcome}}"}], "fieldConfig": {"defaults": {"min": 0, "unit": "ops"}, "overrides": []}, "gridPos": {"h": 8, "w": 12, "x": 0, "y": 11}},
+    {"id": 6, "type": "timeseries", "title": "HTTP operations by outcome", "targets": [{"expr": "sum by (operation, outcome) (exg_honcho_import_http_requests_total{job=\"exg_honcho_importer\", host=~\"$host\"})", "legendFormat": "{{operation}} / {{outcome}}"}], "fieldConfig": {"defaults": {"min": 0, "unit": "ops"}, "overrides": []}, "gridPos": {"h": 8, "w": 12, "x": 12, "y": 11}},
+    {"id": 7, "type": "timeseries", "title": "p95 Honcho API duration", "targets": [{"expr": "histogram_quantile(0.95, sum by (le, operation) (rate(exg_honcho_import_http_duration_seconds_bucket{job=\"exg_honcho_importer\", host=~\"$host\"}[5m])))", "legendFormat": "{{operation}} p95"}], "fieldConfig": {"defaults": {"min": 0, "unit": "s"}, "overrides": []}, "gridPos": {"h": 8, "w": 12, "x": 0, "y": 19}},
+    {"id": 8, "type": "timeseries", "title": "Remaining work", "targets": [{"expr": "sum(exg_honcho_import_pending_conversations{job=\"exg_honcho_importer\", host=~\"$host\"})", "legendFormat": "conversations"}, {"expr": "sum(exg_honcho_import_pending_turns{job=\"exg_honcho_importer\", host=~\"$host\"})", "legendFormat": "turns"}], "fieldConfig": {"defaults": {"min": 0, "unit": "short"}, "overrides": []}, "gridPos": {"h": 8, "w": 12, "x": 12, "y": 19}}
+  ],
+  "schemaVersion": 41,
+  "tags": ["honcho", "exg", "import"],
+  "templating": {"list": [{"name": "host", "label": "Host", "type": "query", "datasource": {"type": "prometheus", "uid": "prometheus"}, "definition": "label_values(exg_honcho_import_run_state{job=\"exg_honcho_importer\"}, host)", "query": {"query": "label_values(exg_honcho_import_run_state{job=\"exg_honcho_importer\"}, host)", "refId": "Host"}, "refresh": 1, "sort": 1, "multi": true, "includeAll": true, "allValue": ".*", "current": {"text": "All", "value": "$__all"}, "hide": 0, "options": []}]},
+  "time": {"from": "now-24h", "to": "now"},
+  "title": "EXG Honcho Import",
+  "uid": "exg-honcho-import",
+  "version": 1
+}
