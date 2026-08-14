@@ -145,7 +145,7 @@
       "transparent": true,
       "options": {
         "mode": "markdown",
-        "content": "## Raw MCP endpoint calls\nMetrics from the raw MCP worker (`honcho_mcp_tool_*`). These represent endpoint traffic separately from the native Hermes plugin. Cumulative panels and mean duration show the first scraped call immediately; process counters reset when the MCP worker restarts."
+        "content": "## Raw MCP endpoint calls\nMetrics from the raw MCP worker (`honcho_mcp_tool_*`), attributed only when the caller supplies an allowlisted `X-Hermes-Profile` header; all other traffic is `unknown`. These represent endpoint traffic separately from the native Hermes plugin. Cumulative panels and mean duration show the first scraped call immediately; process counters reset when the MCP worker restarts."
       },
       "gridPos": {
         "h": 2,
@@ -157,8 +157,8 @@
     {
       "id": 8,
       "type": "timeseries",
-      "title": "Raw MCP calls by outcome (cumulative)",
-      "description": "Cumulative raw MCP endpoint calls since the currently running MCP worker started. This displays the first scraped call immediately; counters reset when that worker restarts.",
+      "title": "Raw MCP calls by profile and outcome (cumulative)",
+      "description": "Cumulative raw MCP endpoint calls since the currently running MCP worker started, attributed to the allowlisted caller profile or unknown. This displays the first scraped call immediately; counters reset when that worker restarts.",
       "fieldConfig": {
         "defaults": {
           "unit": "ops",
@@ -168,8 +168,8 @@
       },
       "targets": [
         {
-          "expr": "sum by (tool_name, outcome) (honcho_mcp_tool_calls_total{job=\"honcho_mcp\", tool_name=~\"$mcp_tool\"})",
-          "legendFormat": "{{tool_name}} / {{outcome}}"
+          "expr": "sum by (profile, tool_name, outcome) (honcho_mcp_tool_calls_total{job=\"honcho_mcp\", profile=~\"$mcp_profile\", tool_name=~\"$mcp_tool\"})",
+          "legendFormat": "{{profile}} / {{tool_name}} / {{outcome}}"
         }
       ],
       "gridPos": {
@@ -194,8 +194,8 @@
       },
       "targets": [
         {
-          "expr": "sum by (tool_name) (honcho_mcp_tool_duration_seconds_sum{job=\"honcho_mcp\", tool_name=~\"$mcp_tool\"}) / sum by (tool_name) (honcho_mcp_tool_duration_seconds_count{job=\"honcho_mcp\", tool_name=~\"$mcp_tool\"})",
-          "legendFormat": "{{tool_name}} mean"
+          "expr": "sum by (profile, tool_name) (honcho_mcp_tool_duration_seconds_sum{job=\"honcho_mcp\", profile=~\"$mcp_profile\", tool_name=~\"$mcp_tool\"}) / sum by (profile, tool_name) (honcho_mcp_tool_duration_seconds_count{job=\"honcho_mcp\", profile=~\"$mcp_profile\", tool_name=~\"$mcp_tool\"})",
+          "legendFormat": "{{profile}} / {{tool_name}} mean"
         }
       ],
       "gridPos": {
@@ -219,8 +219,8 @@
       },
       "targets": [
         {
-          "expr": "sum by (tool_name, direction) (honcho_mcp_payload_bytes_total{job=\"honcho_mcp\", tool_name=~\"$mcp_tool\"})",
-          "legendFormat": "{{tool_name}} / {{direction}}"
+          "expr": "sum by (profile, tool_name, direction) (honcho_mcp_payload_bytes_total{job=\"honcho_mcp\", profile=~\"$mcp_profile\", tool_name=~\"$mcp_tool\"})",
+          "legendFormat": "{{profile}} / {{tool_name}} / {{direction}}"
         }
       ],
       "gridPos": {
@@ -244,8 +244,8 @@
       },
       "targets": [
         {
-          "expr": "sum by (tool_name, direction, tokenizer) (honcho_mcp_tool_payload_tokens_estimated_total{job=\"honcho_mcp\", tool_name=~\"$mcp_tool\", tokenizer=~\"$mcp_tokenizer\"})",
-          "legendFormat": "{{tool_name}} / {{direction}} / {{tokenizer}}"
+          "expr": "sum by (profile, tool_name, direction, tokenizer) (honcho_mcp_tool_payload_tokens_estimated_total{job=\"honcho_mcp\", profile=~\"$mcp_profile\", tool_name=~\"$mcp_tool\", tokenizer=~\"$mcp_tokenizer\"})",
+          "legendFormat": "{{profile}} / {{tool_name}} / {{direction}} / {{tokenizer}}"
         }
       ],
       "gridPos": {
@@ -341,6 +341,31 @@
         "options": []
       },
       {
+        "name": "mcp_profile",
+        "label": "MCP caller profile",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "definition": "label_values(honcho_mcp_tool_calls_total{job=\"honcho_mcp\"}, profile)",
+        "query": {
+          "query": "label_values(honcho_mcp_tool_calls_total{job=\"honcho_mcp\"}, profile)",
+          "refId": "McpProfile"
+        },
+        "refresh": 1,
+        "sort": 1,
+        "multi": true,
+        "includeAll": true,
+        "allValue": ".*",
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
+        "hide": 0,
+        "options": []
+      },
+      {
         "name": "mcp_tool",
         "label": "MCP tool",
         "type": "query",
@@ -348,9 +373,9 @@
           "type": "prometheus",
           "uid": "prometheus"
         },
-        "definition": "label_values(honcho_mcp_tool_calls_total{job=\"honcho_mcp\"}, tool_name)",
+        "definition": "label_values(honcho_mcp_tool_calls_total{job=\"honcho_mcp\", profile=~\"$mcp_profile\"}, tool_name)",
         "query": {
-          "query": "label_values(honcho_mcp_tool_calls_total{job=\"honcho_mcp\"}, tool_name)",
+          "query": "label_values(honcho_mcp_tool_calls_total{job=\"honcho_mcp\", profile=~\"$mcp_profile\"}, tool_name)",
           "refId": "McpTool"
         },
         "refresh": 1,
